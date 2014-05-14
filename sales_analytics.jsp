@@ -93,7 +93,7 @@ if(session.getAttribute("name")!=null)
 
 	</SELECT>
 	<SELECT name="quarter">
-		<OPTION value="All Quarters">All Quarters</OPTION>
+		<OPTION value="All Quarters">Full Year</OPTION>
 		<OPTION value="Winter">Winter</OPTION>
 		<OPTION value="Spring">Spring</OPTION>
 		<OPTION value="Summer">Summer</OPTION>
