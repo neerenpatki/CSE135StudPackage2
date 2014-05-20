@@ -64,23 +64,63 @@ if(session.getAttribute("name")!=null)
 %>
 <form action="sales_analytics.jsp">
 	<input type="hidden">&nbsp;</>
-	Order By:
+	Filter By:
 	<SELECT name="customer">
-		<OPTION value="Customer">Customer</OPTION>
-		<OPTION value="State">Customer State</OPTION>
+		<OPTION value="Customers">Customers</OPTION>
+		<OPTION value="States">States</OPTION>
 	</SELECT>
-	<SELECT name="age">
-		<OPTION value="All Ages">All Ages</OPTION>
-		<OPTION value="0-9">0-9</OPTION>
-		<OPTION value="10-19">10-19</OPTION>
-		<OPTION value="20-29">20-29</OPTION>
-		<OPTION value="30-39">30-39</OPTION>
-		<OPTION value="40-49">40-49</OPTION>
-		<OPTION value="50-59">50-59</OPTION>
-		<OPTION value="60-69">60-69</OPTION>
-		<OPTION value="70-79">70-79</OPTION>
-		<OPTION value="80-89">80-89</OPTION>
-		<OPTION value="90-99">90-99</OPTION>
+	<SELECT NAME="state">
+	   <OPTION value-="All States">All States</OPTION>
+	   <OPTION value="Alabama">Alabama</OPTION>
+	   <OPTION value="Alaska">Alaska</OPTION>
+	   <OPTION value="Arizona">Arizona</OPTION>
+	   <OPTION value="Arkansas">Arkansas</OPTION>
+	   <OPTION value="California">California</OPTION>
+	   <OPTION value="Colorado">Colorado</OPTION>
+	   <OPTION value="Connecticut">Connecticut</OPTION>
+	   <OPTION value="Delaware">Delaware</OPTION>
+	   <OPTION value="Florida">Florida</OPTION>
+	   <OPTION value="Georgia">Georgia</OPTION>
+	   <OPTION value="Hawaii">Hawaii</OPTION>
+	   <OPTION value="Idaho">Idaho</OPTION>
+	   <OPTION value="Illinois">Illinois</OPTION>
+	   <OPTION value="Indiana">Indiana</OPTION>
+	   <OPTION value="Iowa">Iowa</OPTION>
+	   <OPTION value="Kansas">Kansas</OPTION>
+	   <OPTION value="Kentucky">Kentucky</OPTION>
+	   <OPTION value="Louisiana">Louisiana</OPTION>
+	   <OPTION value="Maine">Maine</OPTION>
+	   <OPTION value="Maryland">Maryland</OPTION>
+	   <OPTION value="Massachusetts">Massachusetts</OPTION>
+	   <OPTION value="Michigan">Michigan</OPTION>
+	   <OPTION value="Minnesota">Minnesota</OPTION>
+	   <OPTION value="Mississippi">Mississippi</OPTION>
+	   <OPTION value="Missouri">Missouri</OPTION>
+	   <OPTION value="Montana">Montana</OPTION>
+	   <OPTION value="Nebraska">Nebraska</OPTION>
+	   <OPTION value="Nevada">Nevada</OPTION>
+	   <OPTION value="New Hampshire">New Hampshire</OPTION>
+	   <OPTION value="New Jersey">New Jersey</OPTION>
+	   <OPTION value="New Mexico">New Mexico</OPTION>
+	   <OPTION value="New York">New York</OPTION>
+	   <OPTION value="North Carolina">North Carolina</OPTION>
+	   <OPTION value="North Dakota">North Dakota</OPTION>
+	   <OPTION value="Ohio">Ohio</OPTION>
+	   <OPTION value="Oklahoma">Oklahoma</OPTION>
+	   <OPTION value="Oregon">Oregon</OPTION>
+	   <OPTION value="Pennsylvania">Pennsylvania</OPTION>
+	   <OPTION value="Rhode Island">Rhode Island</OPTION>
+	   <OPTION value="South Carolina">South Carolina</OPTION>
+	   <OPTION value="South Dakota">South Dakota</OPTION>
+	   <OPTION value="Tennessee">Tennessee</OPTION>
+	   <OPTION value="Texas">Texas</OPTION>
+	   <OPTION value="Utah">Utah</OPTION>
+	   <OPTION value="Vermont">Vermont</OPTION>
+	   <OPTION value="Virginia">Virginia</OPTION>
+	   <OPTION value="Washington">Washington</OPTION>
+	   <OPTION value="West Virginia">West Virginia</OPTION>
+	   <OPTION value="Wisconsin">Wisconsin</OPTION>
+	   <OPTION value="Wyoming">Wyoming</OPTION>
 	</SELECT>
 	<SELECT name="category">
 		<OPTION value="All Categories">All Categories</OPTION>
@@ -92,12 +132,12 @@ if(session.getAttribute("name")!=null)
 		%>
 
 	</SELECT>
-	<SELECT name="quarter">
-		<OPTION value="All Quarters">Full Year</OPTION>
-		<OPTION value="Winter">Winter</OPTION>
-		<OPTION value="Spring">Spring</OPTION>
-		<OPTION value="Summer">Summer</OPTION>
-		<OPTION value="Fall">Fall</OPTION>
+	<SELECT name="age">
+		<OPTION value="All Ages">All Ages</OPTION>
+		<OPTION value="12-18">12-18</OPTION>
+		<OPTION value="18-45">18-45</OPTION>
+		<OPTION value="45-65">45-65</OPTION>
+		<OPTION value="65-">65-</OPTION>
 	</SELECT>
 	<input type="submit" value="Run Query"/>
 </form>
