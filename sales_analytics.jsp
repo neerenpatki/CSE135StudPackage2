@@ -36,15 +36,25 @@ if(session.getAttribute("name")!=null)
 
 <div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:80%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <%
+		String action = request.getParameter("runQuery");
+		String rowsTitle = "";
+		if (action != null && action.equals("Run Query")) {
+			rowsTitle = request.getParameter("rowTitle");
+		} else {
+			rowsTitle = "Customers"; 
+		}
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
 	   try {c_id_str=request.getParameter("cid"); c_id_int=Integer.parseInt(c_id_str);}catch(Exception e){c_id_str=null;c_id_int=-1;}
 	   try {key=request.getParameter("key");}catch(Exception e){key=null;}
 
-		
+		// Check for default "Customers" option selected and limit to 20 customers
 		if(c_id_int==-1 && key==null)
 		{
-			SQL="SELECT id,name,SKU, category, price FROM products order by id asc;";
+			if (rowsTitle.equals("States"))
+				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
+			else
+				SQL="SELECT name FROM users ORDER BY name asc LIMIT 20;";
 		}
 		else
 		{
@@ -146,30 +156,25 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-		String action = request.getParameter("runQuery");
-		String rowsTitle = "";
-		if (action != null && action.equals("Run Query")) {
-			rowsTitle = request.getParameter("rowTitle");
-		} else {
-			rowsTitle = "Customers"; 
-		}
+
 		rs=stmt.executeQuery(SQL);
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
 		/*out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
-		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
+		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");*/
 		int id=0;
 		String name="", SKU="",category=null;
 		float price=0;
 		while(rs.next())
 		{
-			id=rs.getInt(1);
+			/*id=rs.getInt(1);
 			name=rs.getString(2);
 			 SKU=rs.getString(3);
 			 category=rs.getString(4);
-			 price=rs.getFloat(5);
+			 price=rs.getFloat(5);*/
+			 name = rs.getString(1);
 			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");
-		}*/
+		}
 		out.println("</table>");
 	}
 	catch(Exception e)
