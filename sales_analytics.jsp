@@ -65,7 +65,7 @@ if(session.getAttribute("name")!=null)
 <form action="sales_analytics.jsp">
 	<input type="hidden">&nbsp;</>
 	Filter By:
-	<SELECT name="customer">
+	<SELECT name="rowTitle">
 		<OPTION value="Customers">Customers</OPTION>
 		<OPTION value="States">States</OPTION>
 	</SELECT>
@@ -139,15 +139,24 @@ if(session.getAttribute("name")!=null)
 		<OPTION value="45-65">45-65</OPTION>
 		<OPTION value="65-">65-</OPTION>
 	</SELECT>
-	<input type="submit" value="Run Query"/>
+	<input type="submit" name="runQuery" value="Run Query"/>
 </form>
 
 <br>
 
 
 <%		
+		String action = request.getParameter("runQuery");
+		String rowsTitle = "";
+		if (action != null && action.equals("Run Query")) {
+			rowsTitle = request.getParameter("rowTitle");
+		} else {
+			rowsTitle = "Customers"; 
+		}
 		rs=stmt.executeQuery(SQL);
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
+		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
+		/*out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
 		int id=0;
 		String name="", SKU="",category=null;
@@ -160,7 +169,7 @@ if(session.getAttribute("name")!=null)
 			 category=rs.getString(4);
 			 price=rs.getFloat(5);
 			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");
-		}
+		}*/
 		out.println("</table>");
 	}
 	catch(Exception e)
