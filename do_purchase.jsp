@@ -40,7 +40,7 @@ if(session.getAttribute("name")!=null)
 				try
 				{
 					
-					
+					String SQL_copy="INSERT INTO sales (uid, pid, quantity, price) select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
 					String  SQL="delete from carts where uid="+userID+";";
 					
 					try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
@@ -53,9 +53,11 @@ if(session.getAttribute("name")!=null)
 					try{
 					
 							conn.setAutoCommit(false);
+							/**record log,i.e., sales table**/
+							stmt.execute(SQL_copy);
 							stmt.execute(SQL);
-							
 							conn.commit();
+							
 							conn.setAutoCommit(true);
 							out.println("Dear customer '"+uName+"', Thanks for your purchasing.<br> Your card '"+card+"' has been successfully proved. <br>We will ship the products soon.");
 							out.println("<br><font size=\"+2\" color=\"#990033\"> <a href=\"products_browsing.jsp\" target=\"_self\">Continue purchasing</a></font>");

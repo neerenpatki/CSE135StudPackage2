@@ -13,13 +13,13 @@ if(session.getAttribute("name")!=null)
 	String role = (String)session.getAttribute("role");
 	String  name=null, price_str=null, quantity_str=null, pid_str=null;
 	int pid=0, quantity=0;
-	float price=0;
+	int price=0;
 	try { 
 			name =	request.getParameter("name"); 
 			price_str		  =	request.getParameter("price"); 
 			quantity_str  =	request.getParameter("quantity"); 
 			pid_str =	request.getParameter("id"); 
-			 price    = Float.parseFloat(price_str);
+			 price    = Integer.parseInt(price_str);
 			 pid=Integer.parseInt(pid_str);
 			
 	}
@@ -47,7 +47,7 @@ if(session.getAttribute("name")!=null)
 					String password="880210";
 					conn =DriverManager.getConnection(url, user, password);
 					stmt =conn.createStatement();
-					String  SQL="INSERT INTO carts (uid, pid, quantity,price) VALUES("+userID+", "+pid+", "+quantity+" , "+price+");";
+					String  SQL="INSERT INTO carts (uid, pid, quantity,price) VALUES("+userID+", "+pid+", "+quantity+","+price+" );";
 					
 					try{
 						conn.setAutoCommit(false);

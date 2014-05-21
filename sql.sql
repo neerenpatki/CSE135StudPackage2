@@ -2,25 +2,23 @@
 DROP TABLE categories CASCADE;
 DROP TABLE products CASCADE;
 DROP TABLE carts CASCADE;
+DROP TABLE sales CASCADE;
 
 
 /**table 1: [entity] users**/
 CREATE TABLE users (
     id          SERIAL PRIMARY KEY,
     name        TEXT NOT NULL UNIQUE,
-    role        TEXT,
-    age   	INTEGER,
-    state  	TEXT
+    role        TEXT NOT NULL,
+    age   	INTEGER NOT NULL,
+    state  	TEXT NOT NULL
 );
-INSERT INTO users (name, role, age, state) VALUES('Adam','owner',35,'california');
-INSERT INTO users (name, role, age, state) VALUES('Bruce','owner',46,'Illinois');
+INSERT INTO users (name, role, age, state) VALUES('CSE','owner',35,'california');
 INSERT INTO users (name, role, age, state) VALUES('David','customer',33,'New York');
 INSERT INTO users (name, role, age, state) VALUES('Floyd','customer',27,'Florida');
 INSERT INTO users (name, role, age, state) VALUES('James','customer',55,'Texas');
 INSERT INTO users (name, role, age, state) VALUES('Ross','customer',24,'Arizona');
-SELECT * FROM  users order by id asc;
-
-
+SELECT * FROM  users  order by id asc limit 5;
 
 
 /**table 2: [entity] category**/
@@ -35,44 +33,57 @@ INSERT INTO categories (name, description) VALUES('Cameras','A camera is an opti
 INSERT INTO categories (name, description) VALUES('Video Games','A video game is an electronic game that involves human interaction with a user interface to generate visual feedback on a video device..');
 SELECT * FROM categories order by id asc;
 
-
 /**table 3: [entity] product**/
 CREATE TABLE products (
     id          SERIAL PRIMARY KEY,
     cid         INTEGER REFERENCES categories (id) ON DELETE CASCADE,
     name        TEXT NOT NULL,
     SKU         TEXT NOT NULL UNIQUE,
-    category    TEXT NOT NULL,
-    price       FLOAT NOT NULL
+    price       INTEGER NOT NULL
 );
-INSERT INTO products (cid, name, SKU, category, price) VALUES(1, 'Apple MacBook','103001', 'Computers',1200);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(1, 'HP Laptop',    '106044', 'Computers',480);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(1, 'Dell Laptop',  '109023', 'Computers',399.99);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(2, 'Iphone 5s',        '200101', 'Cell Phones',709);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(2, 'Samsung Galaxy S4','208809', 'Cell Phones',488.5);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(2, 'LG Optimus g',     '209937', 'Cell Phones',375);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(3, 'Sony DSC-RX100M','301211', 'Cameras',689.7);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(3, 'Canon EOS Rebel T3',  '304545', 'Cameras',449.9);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(3, 'Nikon D3100',  '308898', 'Cameras',520);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(4, 'Xbox 360',  '405065', 'Video Games',249.99);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(4, 'Nintendo Wii U ',  '407033', 'Video Games',430.99);
-INSERT INTO products (cid, name, SKU, category, price) VALUES(4, 'Nintendo Wii',  '408076', 'Video Games',232.99);
-SELECT * FROM products order by id asc;
+INSERT INTO products (cid, name, SKU, price) VALUES(1, 'Apple MacBook',		'103001',	1200); /**1**/
+INSERT INTO products (cid, name, SKU, price) VALUES(1, 'HP Laptop',    		'106044',	480);
+INSERT INTO products (cid, name, SKU, price) VALUES(1, 'Dell Laptop',  		'109023',	399);/**3**/
+INSERT INTO products (cid, name, SKU, price) VALUES(2, 'Iphone 5s',        	'200101',	709);
+INSERT INTO products (cid, name, SKU, price) VALUES(2, 'Samsung Galaxy S4',	'208809',	488);/**5**/
+INSERT INTO products (cid, name, SKU, price) VALUES(2, 'LG Optimus g',    	 '209937',	375);
+INSERT INTO products (cid, name, SKU, price) VALUES(3, 'Sony DSC-RX100M',	'301211',	689);/**7**/
+INSERT INTO products (cid, name, SKU, price) VALUES(3, 'Canon EOS Rebel T3', 	 '304545',	449);
+INSERT INTO products (cid, name, SKU, price) VALUES(3, 'Nikon D3100',  		'308898',	520);
+INSERT INTO products (cid, name, SKU, price) VALUES(4, 'Xbox 360',  		'405065',	249);/**10**/
+INSERT INTO products (cid, name, SKU, price) VALUES(4, 'Nintendo Wii U ', 	 '407033',	430);
+INSERT INTO products (cid, name, SKU, price) VALUES(4, 'Nintendo Wii',  	'408076',	232);
+SELECT * FROM products order by id asc limit 10;
+
+
 
 /**table 4: [relation] carts**/
+CREATE TABLE sales (
+    id          SERIAL PRIMARY KEY,
+    uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    pid         INTEGER REFERENCES products (id) ON DELETE CASCADE,
+    quantity    INTEGER NOT NULL,
+    price	INTEGER NOT NULL
+);
+
+SELECT * FROM sales order by id desc;
+
+
+
 CREATE TABLE carts (
     id          SERIAL PRIMARY KEY,
     uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
     pid         INTEGER REFERENCES products (id) ON DELETE CASCADE,
-    quantity    INTEGER,
-    price       FLOAT
+    quantity    INTEGER NOT NULL,
+    price	INTEGER NOT NULL
 );
-INSERT INTO carts (uid, pid, quantity,price) VALUES(3, 1 , 2, 1200);
-INSERT INTO carts (uid, pid, quantity,price) VALUES(3, 2 , 1, 480);
-INSERT INTO carts (uid, pid, quantity,price) VALUES(4, 10, 4, 249.99);
-INSERT INTO carts (uid, pid, quantity,price) VALUES(5, 12, 2, 465.98);
-INSERT INTO carts (uid, pid, quantity,price) VALUES(5, 9 , 5, 520);
-INSERT INTO carts (uid, pid, quantity,price) VALUES(5, 5 , 3, 488.5);
-INSERT INTO carts (uid, pid, quantity,price) VALUES(6, 10, 3, 249.99);
-SELECT * FROM carts order by id desc;
 
+INSERT INTO carts (uid, pid, quantity, price) VALUES(3, 1 , 2, 1200);
+INSERT INTO carts (uid, pid, quantity, price) VALUES(3, 2 , 1, 480);
+INSERT INTO carts (uid, pid, quantity, price) VALUES(4, 10, 4, 249);
+INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 12, 2, 232);
+INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 9 , 5, 520);
+INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 5 , 3, 488);
+INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 1, 1, 1200);
+
+SELECT * FROM carts order by id desc;

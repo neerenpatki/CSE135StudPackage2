@@ -42,23 +42,28 @@ if(session.getAttribute("name")!=null)
 </div>
 <%
 		String action=null,name=null, SKU=null, category=null, price_str=null, id_str=null;
-		float price=0;
+		int price=0;
 		try { action	  = request.getParameter("action");}catch(Exception e){action  = null;}
 		try {id_str	  = request.getParameter("id");}catch(Exception e){id_str =	null;}
 		try{
 			name	  =	request.getParameter("name"); 
 			SKU		  =	request.getParameter("SKU"); 
-			category  =	request.getParameter("category"); 
 			price_str =	request.getParameter("price"); 
-			price     = Float.parseFloat(price_str);
+			price     = Integer.parseInt(price_str);
 		}
 		catch(Exception e) 
 		{ 
 			name	  = null; 
 			SKU		  =	null; 
-			category  =	null; 
 			price_str =	null; 
 			price     = 0;
+		}
+		try{
+			category  =	request.getParameter("category"); 
+		}
+		catch(Exception e) 
+		{ 
+			category  =	null; 
 		}
 		if(("insert").equals(action))
 		{
@@ -68,7 +73,7 @@ if(session.getAttribute("name")!=null)
 			{
 				cid=rs.getInt(1);
 			}
-			String  SQL_1="INSERT INTO products (cid, name, SKU, category, price) VALUES("+cid+",'"+name+"','"+SKU+"', '"+category+"',"+price+");";
+			String  SQL_1="INSERT INTO products (cid, name, SKU, price) VALUES("+cid+",'"+name+"','"+SKU+"', "+price+");";
 			try{
 			conn.setAutoCommit(false);
 			stmt.execute(SQL_1);
@@ -82,7 +87,7 @@ if(session.getAttribute("name")!=null)
 		}
 		else if(("update").equals(action))
 		{
-			String  SQL_2="update products set name='"+name+"' , SKU='"+SKU+"' , category='"+category+"' , price='"+price+"' where id="+id_str+";";
+			String  SQL_2="update products set name='"+name+"' , SKU='"+SKU+"'  , price='"+price+"' where id="+id_str+";";
 			try{
 				conn.setAutoCommit(false);
 				stmt.execute(SQL_2);
@@ -111,7 +116,7 @@ if(session.getAttribute("name")!=null)
 		}
 %>
 
-<div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<div style="width:79%; position:absolute; top:50px; right:0px; height:90%;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <%
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -121,21 +126,21 @@ if(session.getAttribute("name")!=null)
 		
 		if(c_id_int==-1 && key==null)
 		{
-			SQL="SELECT id,name,SKU, category, price FROM products order by id asc;";
+			SQL="SELECT p.id, p.name,SKU,c.name, price FROM products p, categories c where p.cid=c.id  order by p.id desc limit 20;";
 		}
 		else
 		{
 			if(c_id_int==-1 && key!=null)
 			{
-				SQL="SELECT id,name,SKU, category, price FROM products where name LIKE '"+key+"%' order by id asc;";
+				SQL="SELECT p.id, p.name,SKU,c.name, price FROM  products p, categories c where p.cid=c.id  and p.name LIKE '"+key+"%' order by p.id desc limit 20;";
 			}
 			else if(c_id_int!=-1 && key!=null)
 			{
-				SQL="SELECT id,name,SKU, category, price FROM products where cid="+c_id_int+" and name LIKE '"+key+"%' order by id asc;";
+				SQL="SELECT p.id, p.name,SKU, c.name,price FROM  products p, categories c where p.cid=c.id  and cid="+c_id_int+" and p.name LIKE '"+key+"%' order by p.id desc limit 20;";
 			}
 			else if(c_id_int!=-1 && key==null)
 			{
-				SQL="SELECT id,name,SKU, category, price FROM products where cid="+c_id_int+" order by id asc;";
+				SQL="SELECT p.id, p.name,SKU,c.name, price FROM products p, categories c where p.cid=c.id and cid="+c_id_int+" order by p.id desc limit 20;";
 			}
 		}
 %>
@@ -187,7 +192,7 @@ Search for products:
 			name=rs.getString(2);
 			 SKU=rs.getString(3);
 			 category=rs.getString(4);
-			 price=rs.getFloat(5);
+			 price=rs.getInt(5);
 %>			 
 		
 		<tr align="center">
@@ -196,7 +201,7 @@ Search for products:
 			<input type="text" name="id" id="id" value="<%=id%>" style="display:none">
 			<td width="20%"><input type="text" name="name" id="name" value="<%=name%>"></td>
 			<td width="20%"><input type="text" name="SKU" id="SKU" value="<%=SKU%>"></td>
-			<td width="20%"><input type="text" name="category" id="category" value="<%=category%>"></td>
+			<td width="20%"><input type="text" name="category" id="category" disabled="disabled" value="<%=category%>"></td>
 			<td width="10%"><input type="text" name="price" id="price" value="<%=price%>"></td>
 			<td width="10%"><input type="submit" value="Update"></td>
 		</form>

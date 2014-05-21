@@ -58,11 +58,11 @@ if(session.getAttribute("name")!=null)
 <%
 	rs=stmt.executeQuery("SELECT * FROM products where id="+id+";");
 	c_name=null;
-	float price=0;
+	int price=0;
 	if(rs.next())
 	{
 		c_name=rs.getString(3);
-		price=rs.getFloat(6);
+		price=rs.getInt(5);
 	}
 %>
 <form action="do_product_order.jsp" method="post">

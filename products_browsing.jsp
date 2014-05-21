@@ -54,21 +54,21 @@ if(session.getAttribute("name")!=null)
 		
 		if(c_id_int==-1 && key==null)
 		{
-			SQL="SELECT id,name,SKU, category, price FROM products order by id asc;";
+			SQL="SELECT p.id, p.name,SKU,c.name, price FROM products p, categories c where p.cid=c.id  order by p.id desc limit 20;";
 		}
 		else
 		{
 			if(c_id_int==-1 && key!=null)
 			{
-				SQL="SELECT id,name,SKU, category, price FROM products where name LIKE '"+key+"%' order by id asc;";
+				SQL="SELECT p.id, p.name,SKU,c.name, price FROM  products p, categories c where p.cid=c.id  and p.name LIKE '"+key+"%' order by p.id desc limit 20;";
 			}
 			else if(c_id_int!=-1 && key!=null)
 			{
-				SQL="SELECT id,name,SKU, category, price FROM products where cid="+c_id_int+" and name LIKE '"+key+"%' order by id asc;";
+				SQL="SELECT p.id, p.name,SKU, c.name,price FROM  products p, categories c where p.cid=c.id  and cid="+c_id_int+" and p.name LIKE '"+key+"%' order by p.id desc limit 20;";
 			}
 			else if(c_id_int!=-1 && key==null)
 			{
-				SQL="SELECT id,name,SKU, category, price FROM products where cid="+c_id_int+" order by id asc;";
+				SQL="SELECT p.id, p.name,SKU,c.name, price FROM products p, categories c where p.cid=c.id and cid="+c_id_int+" order by p.id desc limit 20;";
 			}
 		}
 %>
@@ -86,14 +86,14 @@ Search for products:
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
 		int id=0;
 		String name="", SKU="",category=null;
-		float price=0;
+		int price=0;
 		while(rs.next())
 		{
 			id=rs.getInt(1);
 			name=rs.getString(2);
 			 SKU=rs.getString(3);
 			 category=rs.getString(4);
-			 price=rs.getFloat(5);
+			 price=rs.getInt(5);
 			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");
 		}
 		out.println("</table>");

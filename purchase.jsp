@@ -19,7 +19,7 @@ if(session.getAttribute("name")!=null)
 		<tr><td><a href="buyShoppingCart.jsp" target="_self">Buy Shopping Cart</a></td></tr>
 	</table>	
 </div>
-<div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <p><table align="center" width="80%" style="border-bottom-width:2px; border-top-width:2px; border-bottom-style:solid; border-top-style:solid">
 	<tr><td align="left"><font size="+3">Purchase Order</font></td><td align="right"><font size="+3"><font size="+2">Computer Science &  Engineering</font> </font></td></tr>
 </table>
@@ -38,17 +38,17 @@ if(session.getAttribute("name")!=null)
 		conn =DriverManager.getConnection(url, user, password);
 		stmt =conn.createStatement();
 		ResultSet rs=null;
-		String SQL="select p.name, c.quantity, c.price from products p, users u, carts c where c.uid=u.id and c.pid=p.id and c.uid="+userID;
+		String SQL="select p.name, c.quantity, p.price from products p, users u, carts c where c.uid=u.id and c.pid=p.id and c.uid="+userID;
 		rs=stmt.executeQuery(SQL);
 		out.println("<table width=\"80%\"  align=\"center\">");
 		String name=null;
 		int quantity=0;
-		float price=0, amount_price=0, total_price=0;
+		int price=0, amount_price=0, total_price=0;
 		while(rs.next())
 		{
 			name=rs.getString(1);
 			 quantity=rs.getInt(2);
-			 price=rs.getFloat(3);
+			 price=rs.getInt(3);
 			 amount_price=quantity*price;
 			 total_price+=amount_price;
 			 out.println("<tr><td width=\"30%\">"+name+"</td><td width=\"25%\">"+price+"</td><td width=\"25%\">"+quantity+"</td><td width=\"20%\">$"+amount_price+"</td></tr>");

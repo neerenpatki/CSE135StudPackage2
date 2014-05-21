@@ -67,7 +67,7 @@ if(session.getAttribute("name")!=null)
 		// Check for default "Customers" option selected and limit to 20 customers
 		if(c_id_int==-1 && key==null)
 		{
-			if (rowsTitle.equals("States")){
+			if (rowsTitle.equals("States")) {
 				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			}
 			/*else {
@@ -75,7 +75,7 @@ if(session.getAttribute("name")!=null)
 
 			}*/
 			else{
-				if(stateSel.equals("All States")){
+				if(stateSel != null && stateSel.equals("All States")) {
 					SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20";
 				} else{
 					SQL="SELECT id, name FROM users WHERE state = '"+stateSel+ 
@@ -201,8 +201,8 @@ if(session.getAttribute("name")!=null)
 			for (int j = 0; j < 10; j++) {
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 
-			 	String spentSQL = "SELECT u.name, p.name, (c.quantity*c.price) FROM users u, carts c, "+
-			 	"products p WHERE u.id = "+uID+" AND c.uid = u.id AND p.id = "+prodID[j]+" AND c.pid = p.id";
+			 	String spentSQL = "SELECT u.name, p.name, (s.quantity*s.price) FROM users u, sales s, "+
+			 	"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
 			 	spentRS = stmt3.executeQuery(spentSQL);
 			 	if (spentRS.next()) {
 			 	    //out.print(spentRS.getInt(1) + spentRS.getInt(2) + spentRS.getFloat(3));

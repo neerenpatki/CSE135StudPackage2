@@ -15,20 +15,14 @@ if(("Y").equals(need_to_connect_db))
 		{
 		
 			try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-			String url="jdbc:postgresql://localhost/P1";
+			String url="jdbc:postgresql://127.0.0.1:5432/P1";
 			String user="postgres";
 			String password="880210";
-
-			//conn =DriverManager.getConnection(url, user, password);
-			// Open a connection to the database using DriverManager
-            conn = DriverManager.getConnection(
-                "jdbc:postgresql://localhost/P1?" +
-                "user=postgres&password=880210");
-
+			conn =DriverManager.getConnection(url, user, password);
 			stmt =conn.createStatement();
 			ResultSet rs=null;
 			rs=stmt.executeQuery("SELECT * FROM  users where name='"+name+"';");
-
+		
 			String role=null;
 			int userID=0;
 			int t=0;
@@ -118,8 +112,8 @@ else
 	if(role_flag==1)
 	{
 	    out.print("<tr align=\"center\"><td colspan=\"2\"><font color=\"#FF0000\">Welcome owner \""+name+"\"</font><br>");
-		out.print("<a href=\"categories.jsp\"> Manage Categories</a><br>");
-		out.print("<a href=\"products.jsp\"> Manage Products</a><br>");
+		out.print("<a href=\"categories.jsp\">Manage Categories</a><br>");
+		out.print("<a href=\"products.jsp\">Manage Products</a><br>");
 		out.print("<a href=\"login.jsp?flag=-1\"> Change an account</a><br>");
 		out.print("</td></tr>");
 	}
