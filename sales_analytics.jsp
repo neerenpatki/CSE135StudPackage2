@@ -18,8 +18,9 @@ if(session.getAttribute("name")!=null)
 
 		<%
 		Connection conn=null;
-		Statement stmt;
+		Statement stmt, stmt2;
 		String SQL=null;
+		String prodSQL=null;
 		try
 		{
 			try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
@@ -28,7 +29,9 @@ if(session.getAttribute("name")!=null)
 			String password="880210";
 			conn =DriverManager.getConnection(url, user, password);
 			stmt =conn.createStatement();
+			stmt2 =conn.createStatement();
 			ResultSet rs=null;
+			ResultSet prodRS=null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
 			int c_id=0;
@@ -156,10 +159,20 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-
+		prodSQL="SELECT RPAD(name,10,\'\') FROM Products ORDER BY name LIMIT 10";
+		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
+
+		
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
-		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
+		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td>");
+		int i = 0;
+		String prodName="";
+		while(prodRS.next()){
+			prodName = prodRS.getString(1);
+			out.println("<td width=\"8%\"><B>"+prodName+"</B></td>");
+		//<td width=\"20%\"><B>"+prodName+"</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
+		}	
 		/*out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");*/
 		int id=0;
@@ -173,7 +186,7 @@ if(session.getAttribute("name")!=null)
 			 category=rs.getString(4);
 			 price=rs.getFloat(5);*/
 			 name = rs.getString(1);
-			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");
+			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 		}
 		out.println("</table>");
 	}
