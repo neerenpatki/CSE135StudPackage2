@@ -18,7 +18,7 @@ if(session.getAttribute("name")!=null)
 
 		<%
 		Connection conn=null;
-		Statement stmt, stmt2;
+		Statement stmt, stmt2, stmt3;
 		String SQL=null;
 		String prodSQL=null;
 		try
@@ -30,8 +30,10 @@ if(session.getAttribute("name")!=null)
 			conn =DriverManager.getConnection(url, user, password);
 			stmt =conn.createStatement();
 			stmt2 =conn.createStatement();
+			stmt3 = conn.createStatement();
 			ResultSet rs=null;
 			ResultSet prodRS=null;
+			ResultSet spentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
 			int c_id=0;
@@ -65,7 +67,7 @@ if(session.getAttribute("name")!=null)
 			if (rowsTitle.equals("States"))
 				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			else
-				SQL="SELECT name FROM users ORDER BY name asc LIMIT 20;";
+				SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20;";
 		}
 		else
 		{
@@ -120,7 +122,7 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-		prodSQL="SELECT RPAD(name,10,\'\') FROM Products ORDER BY name LIMIT 10";
+		prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
 		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
 
@@ -128,14 +130,20 @@ if(session.getAttribute("name")!=null)
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td>");
 		String prodName="";
+		int[] prodID = new int[10];
+		int prodIndex = 0;
 		while(prodRS.next()){
-			prodName = prodRS.getString(1);
+		    int id = prodRS.getInt(1);
+		    prodName = prodRS.getString(2);
 			out.println("<td width=\"8%\"><B>"+prodName+"</B></td>");
+			prodID[prodIndex] = id;
+			prodIndex++;
 		//<td width=\"20%\"><B>"+prodName+"</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
 		}	
 		/*out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");*/
 		int id=0;
+		int uID = 0;
 		String name="", SKU="",category=null;
 		float price=0;
 		int i = 0;
@@ -153,9 +161,27 @@ if(session.getAttribute("name")!=null)
 
 			 if (rowsTitle.equals("States"))
 			 	name = states[i];
-			 else
-			 	name = rs.getString(1);
-			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+			 else {
+			    uID = rs.getInt(1);
+			 	name = rs.getString(2);
+			 	//out.println("UID: " + uID + " name: " + name);
+			 }
+			 	/*out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");*/
+			 
+			 out.print("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+			 for (int j = 0; j < 10; j++) {
+			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
+
+			 	String spentSQL = "SELECT u.name, p.name, (c.quantity*c.price) FROM users u, carts c, "+
+			 	"products p WHERE u.id = "+uID+" AND c.uid = u.id AND p.id = "+prodID[j]+" AND c.pid = p.id";
+			 	spentRS = stmt3.executeQuery(spentSQL);
+			 	if (spentRS.next()) {
+			 	    //out.print(spentRS.getInt(1) + spentRS.getInt(2) + spentRS.getFloat(3));
+			 		out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
+			 	} else {
+			 		out.print("<td width=\"8%\">$0</td>");
+			 	}
+			 }
 			 i++;
 
 		}
