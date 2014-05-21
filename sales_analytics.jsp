@@ -37,8 +37,16 @@ if(session.getAttribute("name")!=null)
 			int c_id=0;
 		%>
 
-<div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:80%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:87%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <%
+		String[] states = { "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+			"Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana",
+			"Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+			"Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+			"New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma",
+			"Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+			"Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", 
+			"Wyoming" };
 		String action = request.getParameter("runQuery");
 		String rowsTitle = "";
 		if (action != null && action.equals("Run Query")) {
@@ -84,56 +92,9 @@ if(session.getAttribute("name")!=null)
 	</SELECT>
 	<SELECT NAME="state">
 	   <OPTION value-="All States">All States</OPTION>
-	   <OPTION value="Alabama">Alabama</OPTION>
-	   <OPTION value="Alaska">Alaska</OPTION>
-	   <OPTION value="Arizona">Arizona</OPTION>
-	   <OPTION value="Arkansas">Arkansas</OPTION>
-	   <OPTION value="California">California</OPTION>
-	   <OPTION value="Colorado">Colorado</OPTION>
-	   <OPTION value="Connecticut">Connecticut</OPTION>
-	   <OPTION value="Delaware">Delaware</OPTION>
-	   <OPTION value="Florida">Florida</OPTION>
-	   <OPTION value="Georgia">Georgia</OPTION>
-	   <OPTION value="Hawaii">Hawaii</OPTION>
-	   <OPTION value="Idaho">Idaho</OPTION>
-	   <OPTION value="Illinois">Illinois</OPTION>
-	   <OPTION value="Indiana">Indiana</OPTION>
-	   <OPTION value="Iowa">Iowa</OPTION>
-	   <OPTION value="Kansas">Kansas</OPTION>
-	   <OPTION value="Kentucky">Kentucky</OPTION>
-	   <OPTION value="Louisiana">Louisiana</OPTION>
-	   <OPTION value="Maine">Maine</OPTION>
-	   <OPTION value="Maryland">Maryland</OPTION>
-	   <OPTION value="Massachusetts">Massachusetts</OPTION>
-	   <OPTION value="Michigan">Michigan</OPTION>
-	   <OPTION value="Minnesota">Minnesota</OPTION>
-	   <OPTION value="Mississippi">Mississippi</OPTION>
-	   <OPTION value="Missouri">Missouri</OPTION>
-	   <OPTION value="Montana">Montana</OPTION>
-	   <OPTION value="Nebraska">Nebraska</OPTION>
-	   <OPTION value="Nevada">Nevada</OPTION>
-	   <OPTION value="New Hampshire">New Hampshire</OPTION>
-	   <OPTION value="New Jersey">New Jersey</OPTION>
-	   <OPTION value="New Mexico">New Mexico</OPTION>
-	   <OPTION value="New York">New York</OPTION>
-	   <OPTION value="North Carolina">North Carolina</OPTION>
-	   <OPTION value="North Dakota">North Dakota</OPTION>
-	   <OPTION value="Ohio">Ohio</OPTION>
-	   <OPTION value="Oklahoma">Oklahoma</OPTION>
-	   <OPTION value="Oregon">Oregon</OPTION>
-	   <OPTION value="Pennsylvania">Pennsylvania</OPTION>
-	   <OPTION value="Rhode Island">Rhode Island</OPTION>
-	   <OPTION value="South Carolina">South Carolina</OPTION>
-	   <OPTION value="South Dakota">South Dakota</OPTION>
-	   <OPTION value="Tennessee">Tennessee</OPTION>
-	   <OPTION value="Texas">Texas</OPTION>
-	   <OPTION value="Utah">Utah</OPTION>
-	   <OPTION value="Vermont">Vermont</OPTION>
-	   <OPTION value="Virginia">Virginia</OPTION>
-	   <OPTION value="Washington">Washington</OPTION>
-	   <OPTION value="West Virginia">West Virginia</OPTION>
-	   <OPTION value="Wisconsin">Wisconsin</OPTION>
-	   <OPTION value="Wyoming">Wyoming</OPTION>
+	   <%for (int i = 0; i < states.length; i++) {%>
+	   <OPTION value=<%=states[i]%>><%=states[i]%></OPTION>
+	   <%}%>
 	</SELECT>
 	<SELECT name="category">
 		<OPTION value="All Categories">All Categories</OPTION>
@@ -178,20 +139,38 @@ if(session.getAttribute("name")!=null)
 		int id=0;
 		String name="", SKU="",category=null;
 		float price=0;
-		while(rs.next())
+		int i = 0;
+		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
 		{
+			//if (!rs.next()) break;
 			/*id=rs.getInt(1);
 			name=rs.getString(2);
 			 SKU=rs.getString(3);
 			 category=rs.getString(4);
 			 price=rs.getFloat(5);*/
+
 			 name = rs.getString(1);
 			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+
+			 if (rowsTitle.equals("States"))
+			 	name = states[i];
+			 else
+			 	name = rs.getString(1);
+			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");
+			 i++;
+
 		}
 		out.println("</table>");
+		out.println("<br/>");
+		%>
+		<div align="right"><form action="sales_analytics.jsp">
+			<input type="submit" name="next" value="Next"/>
+		</form></div>
+		<%
 	}
 	catch(Exception e)
 	{
+		out.println(e);
 		out.println(SQL);
 		out.println("<font color='#ff0000'>Error.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
 
