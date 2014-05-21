@@ -105,7 +105,7 @@ if(session.getAttribute("name")!=null)
 	<SELECT NAME="state">
 	   <OPTION value-="All States">All States</OPTION>
 	   <%for (int i = 0; i < states.length; i++) {%>
-	   <OPTION value=<%=states[i]%>><%=states[i]%></OPTION>
+	   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
 	   <%}%>
 	</SELECT>
 	<SELECT name="category">
