@@ -52,12 +52,14 @@ if(session.getAttribute("name")!=null)
 		String action = request.getParameter("runQuery");
 		String rowsTitle = "";
 		String stateSel = "All States";
+		String category = "All Categories";
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 		} else {
 			rowsTitle = "Customers"; 
 		}
 		stateSel = request.getParameter("state");
+		category = request.getParameter("category");
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -117,7 +119,7 @@ if(session.getAttribute("name")!=null)
 		<OPTION value="All Categories">All Categories</OPTION>
 		<%
 		while (rs.next()) { %>
-			<OPTION value=<%=rs.getString(2)%>><%=rs.getString(2)%></OPTION>
+			<OPTION value="<%=rs.getString(2)%>"><%=rs.getString(2)%></OPTION>
 		<%
 		}
 		%>
@@ -137,7 +139,12 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-		prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
+		out.println(category);
+		if(category.equals("All Categories")){
+			prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
+		} else{
+			prodSQL="SELECT p.id, RPAD(p.name,10,\'\') FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
+		}
 		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
 
@@ -159,7 +166,7 @@ if(session.getAttribute("name")!=null)
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");*/
 		int id=0;
 		int uID = 0;
-		String name="", SKU="",category=null;
+		String name="", SKU="";
 		float price=0;
 		int i = 0;
 		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
