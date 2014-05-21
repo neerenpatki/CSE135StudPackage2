@@ -127,7 +127,6 @@ if(session.getAttribute("name")!=null)
 		
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td>");
-		int i = 0;
 		String prodName="";
 		while(prodRS.next()){
 			prodName = prodRS.getString(1);
@@ -149,14 +148,14 @@ if(session.getAttribute("name")!=null)
 			 category=rs.getString(4);
 			 price=rs.getFloat(5);*/
 
-			 name = rs.getString(1);
-			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+			 //name = rs.getString(1);
+			 //out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 
 			 if (rowsTitle.equals("States"))
 			 	name = states[i];
 			 else
 			 	name = rs.getString(1);
-			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");
+			 out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 			 i++;
 
 		}
