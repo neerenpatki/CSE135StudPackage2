@@ -51,11 +51,14 @@ if(session.getAttribute("name")!=null)
 			"Wyoming" };
 		String action = request.getParameter("runQuery");
 		String rowsTitle = "";
+		String stateSel = "All States";
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 		} else {
 			rowsTitle = "Customers"; 
 		}
+		stateSel = request.getParameter("state");
+
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
 	   try {c_id_str=request.getParameter("cid"); c_id_int=Integer.parseInt(c_id_str);}catch(Exception e){c_id_str=null;c_id_int=-1;}
@@ -64,10 +67,21 @@ if(session.getAttribute("name")!=null)
 		// Check for default "Customers" option selected and limit to 20 customers
 		if(c_id_int==-1 && key==null)
 		{
-			if (rowsTitle.equals("States"))
+			if (rowsTitle.equals("States")){
 				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			else
 				SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20;";
+
+			}
+			else{
+				if(stateSel.equals("All States")){
+					SQL="SELECT name FROM users ORDER BY name asc LIMIT 20";
+				} else{
+					SQL="SELECT name FROM users WHERE state = '"+stateSel+ 
+					"' ORDER BY name asc LIMIT 20";
+				}
+
+			}
 		}
 		else
 		{
@@ -95,7 +109,7 @@ if(session.getAttribute("name")!=null)
 	<SELECT NAME="state">
 	   <OPTION value-="All States">All States</OPTION>
 	   <%for (int i = 0; i < states.length; i++) {%>
-	   <OPTION value=<%=states[i]%>><%=states[i]%></OPTION>
+	   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
 	   <%}%>
 	</SELECT>
 	<SELECT name="category">
@@ -184,6 +198,21 @@ if(session.getAttribute("name")!=null)
 			 }
 			 i++;
 
+
+			if(rowsTitle.equals("States") && stateSel.equals("All States")){
+				name = states[i];
+			}
+			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
+				name = stateSel;
+				stateSel = "All States";
+				out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+				break;
+			}
+		 	else{
+		 		name = rs.getString(1);
+		 	}
+		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+		 	i++;
 		}
 		out.println("</table>");
 		out.println("<br/>");
