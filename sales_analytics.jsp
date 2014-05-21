@@ -139,7 +139,6 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-		out.println(category);
 		if(category.equals("All Categories")){
 			prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
 		} else{
