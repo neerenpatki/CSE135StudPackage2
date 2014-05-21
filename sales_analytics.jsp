@@ -69,15 +69,16 @@ if(session.getAttribute("name")!=null)
 		{
 			if (rowsTitle.equals("States")){
 				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
-			else
+			}
+			/*else {
 				SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20;";
 
-			}
+			}*/
 			else{
 				if(stateSel.equals("All States")){
-					SQL="SELECT name FROM users ORDER BY name asc LIMIT 20";
+					SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20";
 				} else{
-					SQL="SELECT name FROM users WHERE state = '"+stateSel+ 
+					SQL="SELECT id, name FROM users WHERE state = '"+stateSel+ 
 					"' ORDER BY name asc LIMIT 20";
 				}
 
@@ -182,8 +183,22 @@ if(session.getAttribute("name")!=null)
 			 }
 			 	/*out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");*/
 			 
-			 out.print("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-			 for (int j = 0; j < 10; j++) {
+			 //out.print("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+
+			if(rowsTitle.equals("States") && stateSel.equals("All States")){
+				name = states[i];
+			}
+			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
+				name = stateSel;
+				stateSel = "All States";
+				out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+				break;
+			}
+		 	else{
+		 		name = rs.getString(2);
+		 	}
+		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+			for (int j = 0; j < 10; j++) {
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 
 			 	String spentSQL = "SELECT u.name, p.name, (c.quantity*c.price) FROM users u, carts c, "+
@@ -199,19 +214,6 @@ if(session.getAttribute("name")!=null)
 			 i++;
 
 
-			if(rowsTitle.equals("States") && stateSel.equals("All States")){
-				name = states[i];
-			}
-			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
-				name = stateSel;
-				stateSel = "All States";
-				out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-				break;
-			}
-		 	else{
-		 		name = rs.getString(1);
-		 	}
-		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 		 	i++;
 		}
 		out.println("</table>");
