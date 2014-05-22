@@ -18,7 +18,7 @@ if(session.getAttribute("name")!=null)
 
 		<%
 		Connection conn=null;
-		Statement stmt, stmt2, stmt3, stmt4;
+		Statement stmt, stmt2, stmt3, stmt4, stmt5;
 		String SQL=null;
 		String prodSQL=null;
 		try
@@ -32,10 +32,12 @@ if(session.getAttribute("name")!=null)
 			stmt2 =conn.createStatement();
 			stmt3 = conn.createStatement();
 			stmt4 = conn.createStatement();
+			stmt5 = conn.createStatement();
 			ResultSet rs=null;
 			ResultSet prodRS=null;
 			ResultSet spentRS = null;
 			ResultSet stateSpentRS = null;
+			ResultSet customerSpentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
 			int c_id=0;
@@ -177,6 +179,8 @@ if(session.getAttribute("name")!=null)
 		float price=0;
 		int i = 0;
 		float stateSpentTot = 0;
+		float customerSpentTot = 0;
+		
 		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
 		{
 			//if (!rs.next()) break;
@@ -195,14 +199,22 @@ if(session.getAttribute("name")!=null)
 			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
 			 	if (stateSpentRS.next()) {
 			 		stateSpentTot = stateSpentRS.getFloat(1);
-			 	} else {
+			 	} 
+			 	else {
 			 		stateSpentTot = 0;
 			 	}
-
 			 }
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
+			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s WHERE u.name = '" + name + "' AND u.id = s.uid GROUP BY u.name";
+			 	customerSpentRS = stmt5.executeQuery(customerSpentSQL);
+			 	if(customerSpentRS.next()){
+			 	    customerSpentTot = customerSpentRS.getFloat(1);
+			 	}
+			 	else{
+			 	    customerSpentTot = 0;
+			 	}
 			 	//out.println("UID: " + uID + " name: " + name);
 			 }
 			 	/*out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");*/
@@ -221,7 +233,16 @@ if(session.getAttribute("name")!=null)
 		 	else{
 		 		name = rs.getString(2);
 		 	}
-		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
+		 	
+		 	if(rowsTitle.equals("States")){
+		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
+		 	}
+		 	else{
+		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
+
+		 	}
+		 	
+		 	
 			for (int j = 0; j < 10; j++) {
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 
