@@ -169,8 +169,10 @@ if(session.getAttribute("name")!=null)
 <%		
 		if(category != null && category.equals("All Categories")){
 			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
+			category = "c.name";
 		} else{
-			prodSQL="SELECT p.id, p.name FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
+			category = "'"+category+"'";
+			prodSQL="SELECT p.id, p.name FROM products p, categories c WHERE c.name= "+category+" AND c.id=p.cid ORDER BY p.name LIMIT 10";
 		}
 		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
@@ -228,7 +230,12 @@ if(session.getAttribute("name")!=null)
 
 			if (rowsTitle.equals("States")) {
 			 	name = states[i];
-			 	String stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s WHERE u.state = '"+states[i]+"' AND u.id = s.uid GROUP BY u.state";
+			 	String stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
+			 	+ " categories c, products p WHERE u.state = '"+states[i]+"' AND u.id = s.uid AND "
+			 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.state";
+			 	/*SELECT SUM(s.quantity*s.price) FROM users u, sales s, categories c, products p
+WHERE u.state = 'Alabama' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = 'Computers'
+GROUP BY u.state*/
 			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
 			 	if (stateSpentRS.next()) {
 			 		stateSpentTot = stateSpentRS.getFloat(1);
@@ -240,7 +247,7 @@ if(session.getAttribute("name")!=null)
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
-			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s WHERE u.name = '" + name + "' AND u.id = s.uid GROUP BY u.name";
+			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s WHERE u.name = '"+name+"' AND u.id = s.uid GROUP BY u.name";
 			 	customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			 	if(customerSpentRS.next()){
 			 	    customerSpentTot = customerSpentRS.getFloat(1);
@@ -286,7 +293,7 @@ if(session.getAttribute("name")!=null)
 			    	" AND s.pid = p.id";
 				}
 			 	else {
-			 		spentSQL = "SELECT (s.quantity*s.price) FROM users u, sales s, "+
+			 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
 			 		"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
 			 	}
 			 	spentRS = stmt3.executeQuery(spentSQL);
