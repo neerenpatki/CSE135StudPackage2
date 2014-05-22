@@ -18,7 +18,7 @@ if(session.getAttribute("name")!=null)
 
 		<%
 		Connection conn=null;
-		Statement stmt, stmt2, stmt3, stmt4, stmt5;
+		Statement stmt, stmt2, stmt3, stmt4, stmt5, stmt6;
 		String SQL=null;
 		String prodSQL=null;
 		try
@@ -33,11 +33,13 @@ if(session.getAttribute("name")!=null)
 			stmt3 = conn.createStatement();
 			stmt4 = conn.createStatement();
 			stmt5 = conn.createStatement();
+			stmt6 = conn.createStatement();
 			ResultSet rs=null;
 			ResultSet prodRS=null;
 			ResultSet spentRS = null;
 			ResultSet stateSpentRS = null;
 			ResultSet customerSpentRS = null;
+			ResultSet prodSpentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
 			int c_id=0;
@@ -150,7 +152,7 @@ if(session.getAttribute("name")!=null)
 
 <%		
 		if(category != null && category.equals("All Categories")){
-			prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
+			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
 		} else{
 			prodSQL="SELECT p.id, RPAD(p.name,10,\'\') FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
 		}
@@ -166,7 +168,13 @@ if(session.getAttribute("name")!=null)
 		while(prodRS.next()){
 		    int id = prodRS.getInt(1);
 		    prodName = prodRS.getString(2);
-			out.println("<td width=\"8%\"><B>"+prodName+"</B></td>");
+		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
+		    String prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s WHERE p.id = s.pid AND p.name = '"+prodName+"' GROUP BY p.id ORDER BY p.name";
+		    prodSpentRS = stmt6.executeQuery(prodSpentSQL);
+		    float prodSpentTot = 0;
+		    if (prodSpentRS.next())
+		    	prodSpentTot = prodSpentRS.getFloat(2);
+			out.println("<td width=\"8%\"><B>"+truncProdName+"<br/>($"+prodSpentTot+")</B></td>");
 			prodID[prodIndex] = id;
 			prodIndex++;
 		//<td width=\"20%\"><B>"+prodName+"</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
