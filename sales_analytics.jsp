@@ -53,13 +53,33 @@ if(session.getAttribute("name")!=null)
 		String rowsTitle = "";
 		String stateSel = "All States";
 		String category = "All Categories";
+		String ageSel = "All Ages";
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 		} else {
 			rowsTitle = "Customers"; 
 		}
 		stateSel = request.getParameter("state");
+		if(stateSel == null){
+			stateSel = "All States";
+		}
 		category = request.getParameter("category");
+		if(category == null){
+			category = "All Categories";
+		}
+		ageSel = request.getParameter("age");
+		int upperAge, lowerAge = -1;
+		String upperStr, lowerStr = "";
+		int dash = -1;
+		if(ageSel == null){
+			ageSel = "All Ages";
+		}
+		dash = ageSel.indexOf("-");
+		lowerStr = ageSel.substring(0, dash);
+		upperStr = ageSel.substring(dash+1, ageSel.length());
+		lowerAge = Integer.parseInt(lowerStr);
+		upperAge = Integer.parseInt(upperStr);
+	
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -69,14 +89,14 @@ if(session.getAttribute("name")!=null)
 		// Check for default "Customers" option selected and limit to 20 customers
 		if(c_id_int==-1 && key==null)
 		{
-			if (rowsTitle.equals("States")) {
+			if (rowsTitle.equals("States") && ageSel.equals("All Ages")) {
 				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			}
-			/*else {
-				SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20;";
-
-			}*/
-			else{
+			else if(rowsTitle.equals("States") && !ageSel.equals("All Ages")){
+				SQL = "SELECT state FROM users WHERE age >= "+lowerAge+" AND age < "+upperAge+" ORDER BY name asc LIMIT 20";
+			}
+			else{ //customers selected
+			out.println("please not here");
 				if(stateSel != null && stateSel.equals("All States")) {
 					SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20";
 				} else{
@@ -130,7 +150,7 @@ if(session.getAttribute("name")!=null)
 		<OPTION value="12-18">12-18</OPTION>
 		<OPTION value="18-45">18-45</OPTION>
 		<OPTION value="45-65">45-65</OPTION>
-		<OPTION value="65-">65-</OPTION>
+		<OPTION value="65">65-</OPTION>
 	</SELECT>
 	<input type="submit" name="runQuery" value="Run Query"/>
 </form>
@@ -139,7 +159,7 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-		if(category.equals("All Categories")){
+		if(category != null && category.equals("All Categories")){
 			prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
 		} else{
 			prodSQL="SELECT p.id, RPAD(p.name,10,\'\') FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
@@ -180,8 +200,9 @@ if(session.getAttribute("name")!=null)
 			 //name = rs.getString(1);
 			 //out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 
-			 if (rowsTitle.equals("States"))
+			 if (rowsTitle.equals("States")){
 			 	name = states[i];
+			 }
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
