@@ -18,7 +18,7 @@ if(session.getAttribute("name")!=null)
 
 		<%
 		Connection conn=null;
-		Statement stmt, stmt2, stmt3;
+		Statement stmt, stmt2, stmt3, stmt4;
 		String SQL=null;
 		String prodSQL=null;
 		try
@@ -31,9 +31,11 @@ if(session.getAttribute("name")!=null)
 			stmt =conn.createStatement();
 			stmt2 =conn.createStatement();
 			stmt3 = conn.createStatement();
+			stmt4 = conn.createStatement();
 			ResultSet rs=null;
 			ResultSet prodRS=null;
 			ResultSet spentRS = null;
+			ResultSet stateSpentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
 			int c_id=0;
@@ -59,7 +61,13 @@ if(session.getAttribute("name")!=null)
 			rowsTitle = "Customers"; 
 		}
 		stateSel = request.getParameter("state");
+		if (stateSel == null) {
+			stateSel = "All States";
+		}
 		category = request.getParameter("category");
+		if (category == null) {
+			category = "All Categories";
+		}
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -139,7 +147,7 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
-		if(category.equals("All Categories")){
+		if(category != null && category.equals("All Categories")){
 			prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
 		} else{
 			prodSQL="SELECT p.id, RPAD(p.name,10,\'\') FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
@@ -168,6 +176,7 @@ if(session.getAttribute("name")!=null)
 		String name="", SKU="";
 		float price=0;
 		int i = 0;
+		float stateSpentTot = 0;
 		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
 		{
 			//if (!rs.next()) break;
@@ -180,8 +189,17 @@ if(session.getAttribute("name")!=null)
 			 //name = rs.getString(1);
 			 //out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 
-			 if (rowsTitle.equals("States"))
+			 if (rowsTitle.equals("States")) {
 			 	name = states[i];
+			 	String stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s WHERE u.state = '"+states[i]+"' AND u.id = s.uid GROUP BY u.state";
+			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
+			 	if (stateSpentRS.next()) {
+			 		stateSpentTot = stateSpentRS.getFloat(1);
+			 	} else {
+			 		stateSpentTot = 0;
+			 	}
+
+			 }
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
@@ -203,7 +221,7 @@ if(session.getAttribute("name")!=null)
 		 	else{
 		 		name = rs.getString(2);
 		 	}
-		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
 			for (int j = 0; j < 10; j++) {
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 
