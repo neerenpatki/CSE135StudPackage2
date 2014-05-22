@@ -21,5 +21,8 @@ SELECT * FROM products
 SELECT u.name, p.name, (c.quantity* c.price) as SpentPerProduct FROM users u, carts c, products p WHERE u.id = 6 AND c.uid = u.id
 AND p.id = 10 AND c.pid = p.id
 
-
 SELECT id, RPAD(name,10,'') FROM products ORDER BY name LIMIT 10
+
+// Query for total money spent by state
+SELECT u.state, SUM(s.quantity*s.price) FROM users u, sales s WHERE u.state = 'Alabama' AND u.id = s.uid
+GROUP BY u.state

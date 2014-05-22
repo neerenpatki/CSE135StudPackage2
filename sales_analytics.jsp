@@ -18,7 +18,7 @@ if(session.getAttribute("name")!=null)
 
 		<%
 		Connection conn=null;
-		Statement stmt, stmt2, stmt3;
+		Statement stmt, stmt2, stmt3, stmt4, stmt5, stmt6;
 		String SQL=null;
 		String prodSQL=null;
 		try
@@ -31,15 +31,21 @@ if(session.getAttribute("name")!=null)
 			stmt =conn.createStatement();
 			stmt2 =conn.createStatement();
 			stmt3 = conn.createStatement();
+			stmt4 = conn.createStatement();
+			stmt5 = conn.createStatement();
+			stmt6 = conn.createStatement();
 			ResultSet rs=null;
 			ResultSet prodRS=null;
 			ResultSet spentRS = null;
+			ResultSet stateSpentRS = null;
+			ResultSet customerSpentRS = null;
+			ResultSet prodSpentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
 			int c_id=0;
 		%>
 
-<div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:87%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <%
 		String[] states = { "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
 			"Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana",
@@ -68,18 +74,21 @@ if(session.getAttribute("name")!=null)
 			category = "All Categories";
 		}
 		ageSel = request.getParameter("age");
-		int upperAge, lowerAge = -1;
-		String upperStr, lowerStr = "";
+		int upperAge = 0; 
+		int lowerAge = 0;
+		String upperStr = "";
+		String lowerStr = "";
 		int dash = -1;
 		if(ageSel == null){
 			ageSel = "All Ages";
+		} 
+		if(!ageSel.equals("All Ages")){
+			dash = ageSel.indexOf("-");
+			lowerStr = ageSel.substring(0, dash);
+			upperStr = ageSel.substring(dash+1, ageSel.length());
+			lowerAge = Integer.parseInt(lowerStr);
+			upperAge = Integer.parseInt(upperStr);
 		}
-		dash = ageSel.indexOf("-");
-		lowerStr = ageSel.substring(0, dash);
-		upperStr = ageSel.substring(dash+1, ageSel.length());
-		lowerAge = Integer.parseInt(lowerStr);
-		upperAge = Integer.parseInt(upperStr);
-	
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -96,7 +105,6 @@ if(session.getAttribute("name")!=null)
 				SQL = "SELECT state FROM users WHERE age >= "+lowerAge+" AND age < "+upperAge+" ORDER BY name asc LIMIT 20";
 			}
 			else{ //customers selected
-			out.println("please not here");
 				if(stateSel != null && stateSel.equals("All States")) {
 					SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20";
 				} else{
@@ -160,9 +168,9 @@ if(session.getAttribute("name")!=null)
 
 <%		
 		if(category != null && category.equals("All Categories")){
-			prodSQL="SELECT id, RPAD(name,10,\'\') FROM products ORDER BY name LIMIT 10";
+			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
 		} else{
-			prodSQL="SELECT p.id, RPAD(p.name,10,\'\') FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
+			prodSQL="SELECT p.id, p.name FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
 		}
 		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
@@ -176,7 +184,21 @@ if(session.getAttribute("name")!=null)
 		while(prodRS.next()){
 		    int id = prodRS.getInt(1);
 		    prodName = prodRS.getString(2);
-			out.println("<td width=\"8%\"><B>"+prodName+"</B></td>");
+		    String stateTemp = stateSel;
+		    if (stateTemp.equals("All States")) {
+		    	stateTemp = "u.state";
+			} else {
+				stateTemp = "'" + stateSel + "'";
+			}
+		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
+		    String prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
+		    + " users u WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND "
+		    + "u.id = s.uid GROUP BY p.id ORDER BY p.name";
+		    prodSpentRS = stmt6.executeQuery(prodSpentSQL);
+		    float prodSpentTot = 0;
+		    if (prodSpentRS.next())
+		    	prodSpentTot = prodSpentRS.getFloat(2);
+			out.println("<td width=\"8%\"><B>"+truncProdName+"<br/>($"+prodSpentTot+")</B></td>");
 			prodID[prodIndex] = id;
 			prodIndex++;
 		//<td width=\"20%\"><B>"+prodName+"</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
@@ -188,6 +210,10 @@ if(session.getAttribute("name")!=null)
 		String name="", SKU="";
 		float price=0;
 		int i = 0;
+		int temp = i;
+		float stateSpentTot = 0;
+		float customerSpentTot = 0;
+		
 		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
 		{
 			//if (!rs.next()) break;
@@ -200,12 +226,28 @@ if(session.getAttribute("name")!=null)
 			 //name = rs.getString(1);
 			 //out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
 
-			 if (rowsTitle.equals("States")){
+			if (rowsTitle.equals("States")) {
 			 	name = states[i];
+			 	String stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s WHERE u.state = '"+states[i]+"' AND u.id = s.uid GROUP BY u.state";
+			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
+			 	if (stateSpentRS.next()) {
+			 		stateSpentTot = stateSpentRS.getFloat(1);
+			 	} 
+			 	else {
+			 		stateSpentTot = 0;
+			 	}
 			 }
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
+			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s WHERE u.name = '" + name + "' AND u.id = s.uid GROUP BY u.name";
+			 	customerSpentRS = stmt5.executeQuery(customerSpentSQL);
+			 	if(customerSpentRS.next()){
+			 	    customerSpentTot = customerSpentRS.getFloat(1);
+			 	}
+			 	else{
+			 	    customerSpentTot = 0;
+			 	}
 			 	//out.println("UID: " + uID + " name: " + name);
 			 }
 			 	/*out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");*/
@@ -218,30 +260,44 @@ if(session.getAttribute("name")!=null)
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
 				stateSel = "All States";
-				out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-				break;
+				//out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+				temp = i;
+				i = 20;
 			}
 		 	else{
 		 		name = rs.getString(2);
 		 	}
-		 	out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-			for (int j = 0; j < 10; j++) {
-			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
+		 	
+		 	if(rowsTitle.equals("States")){
+		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
+		 	}
+		 	else{
+		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
 
-			 	String spentSQL = "SELECT u.name, p.name, (s.quantity*s.price) FROM users u, sales s, "+
-			 	"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
+		 	}
+		 	
+		 	
+			for (int j = 0; j < prodIndex; j++) {
+			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
+			    String spentSQL = "";
+			    if (rowsTitle.equals("States")) {
+			    	spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
+			    	+ " u.state = '"+states[temp]+"' AND s.uid = u.id AND p.id = "+prodID[j]+
+			    	" AND s.pid = p.id";
+				}
+			 	else {
+			 		spentSQL = "SELECT (s.quantity*s.price) FROM users u, sales s, "+
+			 		"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
+			 	}
 			 	spentRS = stmt3.executeQuery(spentSQL);
 			 	if (spentRS.next()) {
-			 	    //out.print(spentRS.getInt(1) + spentRS.getInt(2) + spentRS.getFloat(3));
-			 		out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
+			 		out.print("<td width=\"8%\">$"+spentRS.getFloat(1)+"</td>");
 			 	} else {
 			 		out.print("<td width=\"8%\">$0</td>");
 			 	}
 			 }
 			 i++;
-
-
-		 	i++;
+			 temp = i;
 		}
 		out.println("</table>");
 		out.println("<br/>");
