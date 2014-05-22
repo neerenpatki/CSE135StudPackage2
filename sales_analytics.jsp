@@ -178,6 +178,7 @@ if(session.getAttribute("name")!=null)
 		String name="", SKU="";
 		float price=0;
 		int i = 0;
+		int temp = i;
 		float stateSpentTot = 0;
 		float customerSpentTot = 0;
 		
@@ -227,8 +228,9 @@ if(session.getAttribute("name")!=null)
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
 				stateSel = "All States";
-				out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-				break;
+				//out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+				temp = i;
+				i = 20;
 			}
 		 	else{
 		 		name = rs.getString(2);
@@ -248,7 +250,7 @@ if(session.getAttribute("name")!=null)
 			    String spentSQL = "";
 			    if (rowsTitle.equals("States")) {
 			    	spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
-			    	+ " u.state = '"+states[i]+"' AND s.uid = u.id AND p.id = "+prodID[j]+
+			    	+ " u.state = '"+states[temp]+"' AND s.uid = u.id AND p.id = "+prodID[j]+
 			    	" AND s.pid = p.id";
 				}
 			 	else {
@@ -263,6 +265,7 @@ if(session.getAttribute("name")!=null)
 			 	}
 			 }
 			 i++;
+			 temp = i;
 		}
 		out.println("</table>");
 		out.println("<br/>");
