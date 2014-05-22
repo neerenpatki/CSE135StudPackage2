@@ -245,21 +245,24 @@ if(session.getAttribute("name")!=null)
 		 	
 			for (int j = 0; j < 10; j++) {
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
-
-			 	String spentSQL = "SELECT u.name, p.name, (s.quantity*s.price) FROM users u, sales s, "+
-			 	"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
+			    String spentSQL = "";
+			    if (rowsTitle.equals("States")) {
+			    	spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
+			    	+ " u.state = '"+states[i]+"' AND s.uid = u.id AND p.id = "+prodID[j]+
+			    	" AND s.pid = p.id";
+				}
+			 	else {
+			 		spentSQL = "SELECT (s.quantity*s.price) FROM users u, sales s, "+
+			 		"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
+			 	}
 			 	spentRS = stmt3.executeQuery(spentSQL);
 			 	if (spentRS.next()) {
-			 	    //out.print(spentRS.getInt(1) + spentRS.getInt(2) + spentRS.getFloat(3));
-			 		out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
+			 		out.print("<td width=\"8%\">$"+spentRS.getFloat(1)+"</td>");
 			 	} else {
 			 		out.print("<td width=\"8%\">$0</td>");
 			 	}
 			 }
 			 i++;
-
-
-		 	i++;
 		}
 		out.println("</table>");
 		out.println("<br/>");
