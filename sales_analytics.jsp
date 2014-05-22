@@ -218,24 +218,14 @@ if(session.getAttribute("name")!=null)
 		
 		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
 		{
-			//if (!rs.next()) break;
-			/*id=rs.getInt(1);
-			name=rs.getString(2);
-			 SKU=rs.getString(3);
-			 category=rs.getString(4);
-			 price=rs.getFloat(5);*/
-
-			 //name = rs.getString(1);
-			 //out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-
+			
 			if (rowsTitle.equals("States")) {
 			 	name = states[i];
 			 	String stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
 			 	+ " categories c, products p WHERE u.state = '"+states[i]+"' AND u.id = s.uid AND "
 			 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.state";
-			 	/*SELECT SUM(s.quantity*s.price) FROM users u, sales s, categories c, products p
-WHERE u.state = 'Alabama' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = 'Computers'
-GROUP BY u.state*/
+
+
 			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
 			 	if (stateSpentRS.next()) {
 			 		stateSpentTot = stateSpentRS.getFloat(1);
@@ -247,7 +237,7 @@ GROUP BY u.state*/
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
-			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s WHERE u.name = '"+name+"' AND u.id = s.uid GROUP BY u.name";
+			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+ category + " GROUP BY u.name";
 			 	customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			 	if(customerSpentRS.next()){
 			 	    customerSpentTot = customerSpentRS.getFloat(1);
@@ -257,9 +247,7 @@ GROUP BY u.state*/
 			 	}
 			 	//out.println("UID: " + uID + " name: " + name);
 			 }
-			 	/*out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"product_order.jsp?id="+id+"\">Buy it</a></td></tr>");*/
-			 
-			 //out.print("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+			 	
 
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
