@@ -243,7 +243,7 @@ if(session.getAttribute("name")!=null)
 		 	}
 		 	
 		 	
-			for (int j = 0; j < 10; j++) {
+			for (int j = 0; j < prodIndex; j++) {
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 			    String spentSQL = "";
 			    if (rowsTitle.equals("States")) {
