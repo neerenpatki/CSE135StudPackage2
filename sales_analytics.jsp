@@ -154,7 +154,7 @@ if(session.getAttribute("name")!=null)
 		if(category != null && category.equals("All Categories")){
 			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
 		} else{
-			prodSQL="SELECT p.id, RPAD(p.name,10,\'\') FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
+			prodSQL="SELECT p.id, p.name FROM products p, categories c WHERE c.name= '"+category+"' AND c.id=p.cid ORDER BY p.name LIMIT 10";
 		}
 		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
