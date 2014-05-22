@@ -45,7 +45,7 @@ if(session.getAttribute("name")!=null)
 			int c_id=0;
 		%>
 
-<div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:87%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <%
 		String[] states = { "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
 			"Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana",
@@ -168,8 +168,16 @@ if(session.getAttribute("name")!=null)
 		while(prodRS.next()){
 		    int id = prodRS.getInt(1);
 		    prodName = prodRS.getString(2);
+		    String stateTemp = stateSel;
+		    if (stateTemp.equals("All States")) {
+		    	stateTemp = "u.state";
+			} else {
+				stateTemp = "'" + stateSel + "'";
+			}
 		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
-		    String prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s WHERE p.id = s.pid AND p.name = '"+prodName+"' GROUP BY p.id ORDER BY p.name";
+		    String prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
+		    + " users u WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND "
+		    + "u.id = s.uid GROUP BY p.id ORDER BY p.name";
 		    prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 		    float prodSpentTot = 0;
 		    if (prodSpentRS.next())
