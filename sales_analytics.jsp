@@ -209,7 +209,7 @@ if(session.getAttribute("name")!=null)
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");*/
 		int id=0;
 		int uID = 0;
-		String name="", SKU="";
+		String name="", SKU="", tempState = "";
 		float price=0;
 		int i = 0;
 		int temp = i;
@@ -218,19 +218,48 @@ if(session.getAttribute("name")!=null)
 		
 		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
 		{
-			
+			//out.println(states[i]);
+			if(rowsTitle.equals("States") && stateSel.equals("All States")){
+				name = states[i];
+			}
+			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
+				name = stateSel;
+				out.println(name);
+				tempState = name; // Store the state
+				stateSel = "All States";
+				//out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
+				temp = i;
+				i = 20;
+			}
+		 	else{
+		 		name = rs.getString(2);
+		 	}
+			String stateSpentSQL = "";
 			if (rowsTitle.equals("States")) {
-			 	name = states[i];
-			 	String stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
-			 	+ " categories c, products p WHERE u.state = '"+states[i]+"' AND u.id = s.uid AND "
+			 	//name = states[i];
+			 	if (ageSel.equals("All Ages")) {
+			 		stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
+			 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
 			 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.state";
-
-
+			 	} else if (lowerAge == 65) {
+			 		stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
+				 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
+				 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND " +
+				 	"u.age >= "+lowerAge+" GROUP BY u.state";
+			 	} else {
+			 		//out.println(lowerAge + " " + upperAge);
+				 	stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
+				 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
+				 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND " +
+				 	"u.age >= "+lowerAge+" AND age < "+upperAge+" GROUP BY u.state";
+			 	}
 			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
 			 	if (stateSpentRS.next()) {
+			 		//out.println("Entered");
 			 		stateSpentTot = stateSpentRS.getFloat(1);
 			 	} 
 			 	else {
+			 		//out.println("Test");
 			 		stateSpentTot = 0;
 			 	}
 			 }
@@ -248,20 +277,6 @@ if(session.getAttribute("name")!=null)
 			 	//out.println("UID: " + uID + " name: " + name);
 			 }
 			 	
-
-			if(rowsTitle.equals("States") && stateSel.equals("All States")){
-				name = states[i];
-			}
-			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
-				name = stateSel;
-				stateSel = "All States";
-				//out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-				temp = i;
-				i = 20;
-			}
-		 	else{
-		 		name = rs.getString(2);
-		 	}
 		 	
 		 	if(rowsTitle.equals("States")){
 		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
