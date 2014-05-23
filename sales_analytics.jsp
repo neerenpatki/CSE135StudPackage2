@@ -87,7 +87,11 @@ if(session.getAttribute("name")!=null)
 			lowerStr = ageSel.substring(0, dash);
 			upperStr = ageSel.substring(dash+1, ageSel.length());
 			lowerAge = Integer.parseInt(lowerStr);
-			upperAge = Integer.parseInt(upperStr);
+			if(!upperStr.equals("")){
+				upperAge = Integer.parseInt(upperStr);
+			}
+
+			
 		}
 
 	   String c_id_str=null,key=null;
@@ -161,7 +165,7 @@ if(session.getAttribute("name")!=null)
 		<OPTION value="12-18">12-18</OPTION>
 		<OPTION value="18-45">18-45</OPTION>
 		<OPTION value="45-65">45-65</OPTION>
-		<OPTION value="65">65-</OPTION>
+		<OPTION value="65-">65-</OPTION>
 	</SELECT>
 	<input type="submit" name="runQuery" value="Run Query"/>
 </form>
