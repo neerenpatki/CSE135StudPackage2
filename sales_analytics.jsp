@@ -265,7 +265,6 @@ if(session.getAttribute("name")!=null)
 				 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND " +
 				 	"u.age >= "+lowerAge+" GROUP BY u.state";
 			 	} else {
-			 		//out.println(lowerAge + " " + upperAge);
 				 	stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
 				 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
 				 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND " +
@@ -273,18 +272,24 @@ if(session.getAttribute("name")!=null)
 			 	}
 			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
 			 	if (stateSpentRS.next()) {
-			 		//out.println("Entered");
 			 		stateSpentTot = stateSpentRS.getFloat(1);
 			 	} 
 			 	else {
-			 		//out.println("Test");
 			 		stateSpentTot = 0;
 			 	}
 			 }
 			 else {
 			    uID = rs.getInt(1);
 			 	name = rs.getString(2);
-			 	String customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+ category + " GROUP BY u.name";
+			 	String customerSpentSQL = "";
+			 	if (ageSel.equals("All Ages")) {
+			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.name";
+			 	} else if (lowerAge == 65) {
+			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND u.age >= "+lowerAge+
+			 		" GROUP BY u.name";
+			 	} else {
+			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND u.age >= "+lowerAge+" AND age < "+upperAge+" GROUP BY u.name";
+			 	}
 			 	customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			 	if(customerSpentRS.next()){
 			 	    customerSpentTot = customerSpentRS.getFloat(1);
