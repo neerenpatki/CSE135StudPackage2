@@ -13,6 +13,16 @@ if(session.getAttribute("name")!=null)
 {
 	int userID  = (Integer)session.getAttribute("userID");
 	String role = (String)session.getAttribute("role");
+	if (session.getAttribute("nextProds") == null) {
+		session.setAttribute("nextProds", 0);
+	}
+	if (session.getAttribute("nextRows") == null) {
+		session.setAttribute("nextRows", 0);
+	}
+	int nextProds = (Integer)session.getAttribute("nextProds");
+	int nextRows = (Integer)session.getAttribute("nextRows");
+	out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
+	
 %>
 
 
@@ -61,6 +71,17 @@ if(session.getAttribute("name")!=null)
 		String stateSel = "All States";
 		String category = "All Categories";
 		String ageSel = "All Ages";
+		String nextProdsStr = request.getParameter("Next 10 Products");
+		String nextRowsStr = request.getParameter("Next 20 Rows");
+		// Update count for number of times next buttons have been clicked
+		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
+			nextProds++;
+			session.setAttribute("nextProds", nextProds);
+		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
+				|| nextRowsStr.equals("Next 20 States"))) {
+			nextRows++;
+			session.setAttribute("nextRows", nextRows);
+		}
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
@@ -105,7 +126,7 @@ if(session.getAttribute("name")!=null)
 		{
 			// If States and All Ages are selected
 			if (rowsTitle.equals("States") && ageSel.equals("All Ages")) {
-				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
+				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20 OFFSET " + (nextRows*20);
 			}
 			// If States and some specified range of ages are selected
 			else if (rowsTitle.equals("States") && !ageSel.equals("All Ages")) {
@@ -364,7 +385,7 @@ if(session.getAttribute("name")!=null)
 		}
 		%>
 		<div align="right"><form action="sales_analytics.jsp">
-			<input type="submit" name="<%=nextVal%>" value="<%=nextVal%>"/>
+			<input type="submit" name="Next 20 Rows" value="<%=nextVal%>"/>
 		</form></div>
 		
 		<div align="right"><form action="sales_analytics.jsp">
