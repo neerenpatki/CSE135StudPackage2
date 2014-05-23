@@ -132,17 +132,19 @@ if(session.getAttribute("name")!=null)
 %>
 <form action="sales_analytics.jsp">
 	<input type="hidden">&nbsp;</>
-	Filter By:
+	Rows:
 	<SELECT name="rowTitle">
 		<OPTION value="Customers">Customers</OPTION>
 		<OPTION value="States">States</OPTION>
 	</SELECT>
+	State:
 	<SELECT NAME="state">
 	   <OPTION value-="All States">All States</OPTION>
 	   <%for (int i = 0; i < states.length; i++) {%>
 	   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
 	   <%}%>
 	</SELECT>
+	Category:
 	<SELECT name="category">
 		<OPTION value="All Categories">All Categories</OPTION>
 		<%
@@ -153,6 +155,7 @@ if(session.getAttribute("name")!=null)
 		%>
 
 	</SELECT>
+	Age:
 	<SELECT name="age">
 		<OPTION value="All Ages">All Ages</OPTION>
 		<OPTION value="12-18">12-18</OPTION>
@@ -221,6 +224,7 @@ if(session.getAttribute("name")!=null)
 			//out.println(states[i]);
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
+				tempState = name;
 			}
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
@@ -313,7 +317,11 @@ if(session.getAttribute("name")!=null)
 		out.println("<br/>");
 		%>
 		<div align="right"><form action="sales_analytics.jsp">
-			<input type="submit" name="next" value="Next"/>
+			<input type="submit" name="next" value="Next 20 Customers"/>
+		</form></div>
+		
+		<div align="right"><form action="sales_analytics.jsp">
+		    <input type="submit" name="next" value="Next 10 Products"/>
 		</form></div>
 		<%
 	}

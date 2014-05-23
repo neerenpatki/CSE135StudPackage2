@@ -18,6 +18,7 @@ INSERT INTO users (name, role, age, state) VALUES('David','customer',33,'New Yor
 INSERT INTO users (name, role, age, state) VALUES('Floyd','customer',27,'Florida');
 INSERT INTO users (name, role, age, state) VALUES('James','customer',55,'Texas');
 INSERT INTO users (name, role, age, state) VALUES('Ross','customer',24,'Arizona');
+INSERT INTO users (name, role, age, state) VALUES('Tyler','customer',19,'California');
 SELECT * FROM  users  order by id asc limit 5;
 
 
