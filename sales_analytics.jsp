@@ -47,6 +47,7 @@ if(session.getAttribute("name")!=null)
 
 <div style="width:98%; position:absolute; top:80px; left:10px; right:10px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 <%
+		// Declare array of states
 		String[] states = { "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
 			"Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana",
 			"Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
@@ -55,43 +56,43 @@ if(session.getAttribute("name")!=null)
 			"Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
 			"Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", 
 			"Wyoming" };
-		String action = request.getParameter("runQuery");
+		String action = request.getParameter("runQuery"); // Store action when query is ran
 		String rowsTitle = "";
 		String stateSel = "All States";
 		String category = "All Categories";
 		String ageSel = "All Ages";
+		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 		} else {
-			rowsTitle = "Customers"; 
+			rowsTitle = "Customers"; // Set default to be Customers
 		}
-		stateSel = request.getParameter("state");
-		if(stateSel == null){
-			stateSel = "All States";
+		stateSel = request.getParameter("state"); // Get the selected state
+		if (stateSel == null) {
+			stateSel = "All States"; // Set default to be All States
 		}
-		category = request.getParameter("category");
-		if(category == null){
-			category = "All Categories";
+		category = request.getParameter("category"); // Get the selected category
+		if (category == null) {
+			category = "All Categories"; // Set the default to be All Categories
 		}
-		ageSel = request.getParameter("age");
+		ageSel = request.getParameter("age"); // Get the selected age range
 		int upperAge = 0; 
 		int lowerAge = 0;
 		String upperStr = "";
 		String lowerStr = "";
 		int dash = -1;
-		if(ageSel == null){
-			ageSel = "All Ages";
+		if (ageSel == null) {
+			ageSel = "All Ages"; // Set the default to be All Ages
 		} 
-		if(!ageSel.equals("All Ages")){
+		//Parse the selected age range to grab the upper and lower bounds
+		if (!ageSel.equals("All Ages")) {
 			dash = ageSel.indexOf("-");
 			lowerStr = ageSel.substring(0, dash);
 			upperStr = ageSel.substring(dash+1, ageSel.length());
 			lowerAge = Integer.parseInt(lowerStr);
 			if(!upperStr.equals("")){
 				upperAge = Integer.parseInt(upperStr);
-			}
-
-			
+			}		
 		}
 
 	   String c_id_str=null,key=null;
@@ -102,20 +103,23 @@ if(session.getAttribute("name")!=null)
 		// Check for default "Customers" option selected and limit to 20 customers
 		if(c_id_int==-1 && key==null)
 		{
+			// If States and All Ages are selected
 			if (rowsTitle.equals("States") && ageSel.equals("All Ages")) {
 				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			}
-			else if(rowsTitle.equals("States") && !ageSel.equals("All Ages")){
+			// If States and some specified range of ages are selected
+			else if (rowsTitle.equals("States") && !ageSel.equals("All Ages")) {
 				SQL = "SELECT state FROM users WHERE age >= "+lowerAge+" AND age < "+upperAge+" ORDER BY name asc LIMIT 20";
 			}
-			else{ //customers selected
+			// Customers are selected
+			else {
+				// If state selected is All States
 				if(stateSel != null && stateSel.equals("All States")) {
 					SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20";
-				} else{
+				} else { // There was some specified state
 					SQL="SELECT id, name FROM users WHERE state = '"+stateSel+ 
 					"' ORDER BY name asc LIMIT 20";
 				}
-
 			}
 		}
 		else
@@ -174,86 +178,87 @@ if(session.getAttribute("name")!=null)
 
 
 <%		
+		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
 			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
 			category = "c.name";
-		} else{
+		} else { // Category is specified
 			category = "'"+category+"'";
 			prodSQL="SELECT p.id, p.name FROM products p, categories c WHERE c.name= "+category+" AND c.id=p.cid ORDER BY p.name LIMIT 10";
 		}
 		prodRS=stmt2.executeQuery(prodSQL);
 		rs=stmt.executeQuery(SQL);
 
-		
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td>");
-		String prodName="";
-		int[] prodID = new int[10];
+		String prodName=""; // Store the product name
+		int[] prodID = new int[10]; // Store the first 10 id's of the products
 		int prodIndex = 0;
-		while(prodRS.next()){
+		// Go through the first 10 products and get id and name
+		while (prodRS.next()) {
 		    int id = prodRS.getInt(1);
 		    prodName = prodRS.getString(2);
 		    String stateTemp = stateSel;
+		    // If state is not specified
 		    if (stateTemp.equals("All States")) {
 		    	stateTemp = "u.state";
-			} else {
+			} else { // State is specified
 				stateTemp = "'" + stateSel + "'";
 			}
+			// Truncate the product name to only 10 characters
 		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
 		    String prodSpentSQL = "";
+		    // If no age filter was specified
 		    if (ageSel.equals("All Ages")) {
 			    prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
 			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND p.cid = c.id AND c.name = "+category+
 			    " GROUP BY p.id ORDER BY p.name";
-			} else if (lowerAge == 65) {
+			} else if (lowerAge == 65) { // The range of 65- for age was selected
 				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
 			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+
 			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
-			} else {
+			} else { // All other ranges for ages
 				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
 			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+" AND u.age < "+upperAge+
 			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
 			}
 		    prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 		    float prodSpentTot = 0;
-		    if (prodSpentRS.next())
+		    if (prodSpentRS.next()) // There was some money spent on that product
 		    	prodSpentTot = prodSpentRS.getFloat(2);
 			out.println("<td width=\"8%\"><B>"+truncProdName+"<br/>($"+prodSpentTot+")</B></td>");
-			prodID[prodIndex] = id;
-			prodIndex++;
-		//<td width=\"20%\"><B>"+prodName+"</B></td><td width=\"20%\"><B>Category</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
-		}	
-		/*out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
-		out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");*/
-		int id=0;
-		int uID = 0;
+			prodID[prodIndex] = id; // Store the product id
+			prodIndex++; // Increment the index for later use
+		}
+		int id=0; // Store the id
+		int uID = 0; // Store the user id
 		String name="", SKU="", tempState = "";
 		float price=0;
 		int i = 0;
-		int temp = i;
-		float stateSpentTot = 0;
-		float customerSpentTot = 0;
-		
-		while((rowsTitle.equals("States") ? (i < 20) : (rs.next())))
-		{
-			//out.println(states[i]);
+		int temp = i; // Store index temporarily
+		float stateSpentTot = 0; // Total amount spent by the state
+		float customerSpentTot = 0; // Total amount spent by the customer
+		// If the rows selected is states, then show the first 20 states
+		// otherwise traverse through the products
+		while((rowsTitle.equals("States") ? (i < 20) : (rs.next()))) {
+			// If the state was not specified and rows selection was States
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
 				tempState = name;
 			}
+			// If the rows selection was States and a state was specified
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
-				out.println(name);
-				tempState = name; // Store the state
+				tempState = name; // Store the state temporarily
 				stateSel = "All States";
-				//out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td>");
-				temp = i;
-				i = 20;
+				temp = i; // Store the index
+				i = 20; // Essentially break out of the loop
 			}
-		 	else{
-		 		name = rs.getString(2);
+		 	else { // Rows selection was Customer
+		 		name = rs.getString(2); // Get the name of the product
 		 	}
 			String stateSpentSQL = "";
+			// If the rows selection was States
 			if (rowsTitle.equals("States")) {
 			 	if (ageSel.equals("All Ages")) {
 			 		stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
@@ -279,8 +284,8 @@ if(session.getAttribute("name")!=null)
 			 	}
 			 }
 			 else {
-			    uID = rs.getInt(1);
-			 	name = rs.getString(2);
+			    uID = rs.getInt(1); // Get the user id
+			 	name = rs.getString(2); // Get the user name
 			 	String customerSpentSQL = "";
 			 	if (ageSel.equals("All Ages")) {
 			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.name";
@@ -297,21 +302,19 @@ if(session.getAttribute("name")!=null)
 			 	else{
 			 	    customerSpentTot = 0;
 			 	}
-			 	//out.println("UID: " + uID + " name: " + name);
 			 }
 			 	
-		 	
+		 	// If the rows selection was States then display state and total spent by that state
 		 	if(rowsTitle.equals("States")){
 		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
 		 	}
-		 	else{
+		 	else { // Rows selection was Customers so display customer name and total spent by customer
 		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
 
 		 	}
 		 	
-		 	
+		 	// Iterate through the number of products retrieved by query
 			for (int j = 0; j < prodIndex; j++) {
-			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 			    String spentSQL = "";
 			    if (rowsTitle.equals("States")) {
 			    	if (ageSel.equals("All Ages")) {
@@ -347,12 +350,13 @@ if(session.getAttribute("name")!=null)
 			 		out.print("<td width=\"8%\">$0</td>");
 			 	}
 			 }
-			 i++;
-			 temp = i;
+			 i++; // Increment index
+			 temp = i; // Store the index
 		}
 		out.println("</table>");
 		out.println("<br/>");
 		String nextVal = "";
+		// Decide which button to show based on the rows selection
 		if (rowsTitle.equals("States")) {
 			nextVal = "Next 20 States";
 		} else {
