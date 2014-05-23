@@ -196,9 +196,20 @@ if(session.getAttribute("name")!=null)
 				stateTemp = "'" + stateSel + "'";
 			}
 		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
-		    String prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
-		    + " users u WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND "
-		    + "u.id = s.uid GROUP BY p.id ORDER BY p.name";
+		    String prodSpentSQL = "";
+		    if (ageSel.equals("All Ages")) {
+			    prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
+			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND p.cid = c.id AND c.name = "+category+
+			    " GROUP BY p.id ORDER BY p.name";
+			} else if (lowerAge == 65) {
+				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
+			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+
+			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
+			} else {
+				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
+			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+" AND u.age < "+upperAge+
+			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
+			}
 		    prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 		    float prodSpentTot = 0;
 		    if (prodSpentRS.next())
