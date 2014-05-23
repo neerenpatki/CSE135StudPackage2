@@ -221,6 +221,7 @@ if(session.getAttribute("name")!=null)
 			//out.println(states[i]);
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
+				tempState = name;
 			}
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
@@ -236,7 +237,6 @@ if(session.getAttribute("name")!=null)
 		 	}
 			String stateSpentSQL = "";
 			if (rowsTitle.equals("States")) {
-			 	//name = states[i];
 			 	if (ageSel.equals("All Ages")) {
 			 		stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
 			 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
@@ -291,13 +291,31 @@ if(session.getAttribute("name")!=null)
 			    //out.println("UID: " + uID + " prodID: " + prodID[j]);
 			    String spentSQL = "";
 			    if (rowsTitle.equals("States")) {
-			    	spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
-			    	+ " u.state = '"+states[temp]+"' AND s.uid = u.id AND p.id = "+prodID[j]+
-			    	" AND s.pid = p.id";
+			    	if (ageSel.equals("All Ages")) {
+				    	spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
+				    	+ " u.state = '"+tempState+"' AND s.uid = u.id AND p.id = "+prodID[j]+
+				    	" AND s.pid = p.id GROUP BY u.state";
+				 	} else if (lowerAge == 65) {
+				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
+				    	+ " u.state = '"+tempState+"' AND s.uid = u.id AND p.id = "+prodID[j]+
+				    	" AND s.pid = p.id AND u.age >= "+lowerAge+" GROUP BY u.state";
+				 	} else {
+				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
+				    	+ " u.state = '"+tempState+"' AND s.uid = u.id AND p.id = "+prodID[j]+
+				    	" AND s.pid = p.id AND u.age >= "+lowerAge+" AND age < "+upperAge+" GROUP BY u.state";
+				 	}
 				}
 			 	else {
-			 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
-			 		"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
+			 		if (ageSel.equals("All Ages")) {
+			 			spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
+			 			"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
+				 	} else if (lowerAge == 65) {
+				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
+			 			"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id AND u.age >= "+lowerAge+" AND age < "+upperAge;
+				 	} else {
+				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
+			 			"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id AND u.age >= "+lowerAge;
+				 	}
 			 	}
 			 	spentRS = stmt3.executeQuery(spentSQL);
 			 	if (spentRS.next()) {
