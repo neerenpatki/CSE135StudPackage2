@@ -352,14 +352,21 @@ if(session.getAttribute("name")!=null)
 		}
 		out.println("</table>");
 		out.println("<br/>");
+		String nextVal = "";
+		if (rowsTitle.equals("States")) {
+			nextVal = "Next 20 States";
+		} else {
+			nextVal = "Next 20 Customers";
+		}
 		%>
 		<div align="right"><form action="sales_analytics.jsp">
-			<input type="submit" name="next" value="Next 20 Customers"/>
+			<input type="submit" name="<%=nextVal%>" value="<%=nextVal%>"/>
 		</form></div>
 		
 		<div align="right"><form action="sales_analytics.jsp">
-		    <input type="submit" name="next" value="Next 10 Products"/>
+		    <input type="submit" name="Next 10 Products" value="Next 10 Products"/>
 		</form></div>
+		<br/>
 		<%
 	}
 	catch(Exception e)
