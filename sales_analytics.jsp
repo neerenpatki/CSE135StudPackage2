@@ -21,8 +21,7 @@ if(session.getAttribute("name")!=null)
 	}
 	int nextProds = (Integer)session.getAttribute("nextProds");
 	int nextRows = (Integer)session.getAttribute("nextRows");
-	//session.setAttribute("nextProds", 0);
-	//session.setAttribute("nextRows", 0);
+	
 	out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
 	
 %>
@@ -72,7 +71,7 @@ if(session.getAttribute("name")!=null)
 			"Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", 
 			"Wyoming" };
 		String action = request.getParameter("runQuery"); // Store action when query is ran
-		String rowsTitle = "";
+		String rowsTitle = (String)session.getAttribute("rowsTitle");
 		String stateSel = "All States";
 		String category = "All Categories";
 		String ageSel = "All Ages";
@@ -80,6 +79,10 @@ if(session.getAttribute("name")!=null)
 		String nextProdsStr = request.getParameter("Next 10 Products");
 		String nextRowsStr = request.getParameter("Next 20 Rows");
 		ArrayList<String> prodNames = new ArrayList<String>();
+
+		session.setAttribute("nextProds", 0);
+		session.setAttribute("nextRows", 0);
+
 		// Update count for number of times next buttons have been clicked
 		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
 			nextProds++;
@@ -88,13 +91,18 @@ if(session.getAttribute("name")!=null)
 				|| nextRowsStr.equals("Next 20 States"))) {
 			nextRows++;
 			session.setAttribute("nextRows", nextRows);
+			session.setAttribute("rowsTitle", rowsTitle);
 		}
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 			session.setAttribute("rowsTitle", rowsTitle);
 			
-		} else {
+		} else if(session.getAttribute("rowsTitle").equals("States")){
+			rowsTitle = "States";
+		} 
+
+		else {
 			rowsTitle = "Customers"; // Set default to be Customers
 			session.setAttribute("rowsTitle", rowsTitle);
 		}
@@ -280,7 +288,7 @@ if(session.getAttribute("name")!=null)
 		int uID = 0; // Store the user id
 		String name="", SKU="", tempState = "";
 		float price=0;
-		int i = 0;
+		int i = nextRows*20;
 		int temp = i; // Store index temporarily
 		float stateSpentTot = 0; // Total amount spent by the state
 		float customerSpentTot = 0; // Total amount spent by the customer
@@ -305,14 +313,16 @@ if(session.getAttribute("name")!=null)
 
 		// If the rows selected is states, then show the first 20 states
 		// otherwise traverse through the products
-		while((rowsTitle.equals("States") ? (i < 20) : (customersRS.next()))) {
+		while((rowsTitle.equals("States") ? (i < (Math.min(20+(nextRows*20), states.length))) : (customersRS.next()))) {
 			// If the state was not specified and rows selection was States
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
+		out.println(i);
 				tempState = name;
 			}
 			// If the rows selection was States and a state was specified
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
+			out.println("here2");
 				name = stateSel;
 				tempState = name; // Store the state temporarily
 				//stateSel = "All States";
