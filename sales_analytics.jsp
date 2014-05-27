@@ -309,20 +309,13 @@ if(session.getAttribute("name")!=null)
 			    	}
 				}
 				stateSpentRS.first();
+				out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
 			 }
 			 else { // If the rows selection was Customers
 			 	name = customerSpentRS.getString(2); // Get the user name
 			    customerSpentTot = customerSpentRS.getFloat(3);
+			    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
 			}
-			 	
-		 	// If the rows selection was States then display state and total spent by that state
-		 	if(rowsTitle.equals("States")){
-		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
-		 	}
-		 	else { // Rows selection was Customers so display customer name and total spent by customer
-		 	    out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
-
-		 	}
 		 	
 		 	// Iterate through the number of products retrieved by query
 			for (int j = 0; j < prodIndex; j++) {
