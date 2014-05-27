@@ -21,6 +21,8 @@ if(session.getAttribute("name")!=null)
 	}
 	int nextProds = (Integer)session.getAttribute("nextProds");
 	int nextRows = (Integer)session.getAttribute("nextRows");
+	//session.setAttribute("nextProds", 0);
+	//session.setAttribute("nextRows", 0);
 	out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
 	
 %>
@@ -87,14 +89,18 @@ if(session.getAttribute("name")!=null)
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
+			session.setAttribute("rowsTitle", rowsTitle);
+			
 		} else {
 			rowsTitle = "Customers"; // Set default to be Customers
+			session.setAttribute("rowsTitle", rowsTitle);
 		}
 		stateSel = request.getParameter("state"); // Get the selected state
 		if (stateSel == null) {
 			stateSel = "All States"; // Set default to be All States
 		} else {
 			stateFilter = "u.state = '" + stateSel + "'";
+			session.setAttribute("stateFilter", stateFilter);
 		}
 		if (stateSel.equals("All States")) stateFilter = "TRUE";
 		category = request.getParameter("category"); // Get the selected category
@@ -102,6 +108,7 @@ if(session.getAttribute("name")!=null)
 			category = "All Categories"; // Set the default to be All Categories
 		} else {
 			categoryFilter = "c.name = '" + category + "'";
+			session.setAttribute("categoryFilter", categoryFilter);
 		}
 		if (category.equals("All Categories")) categoryFilter = "TRUE";
 		ageSel = request.getParameter("age"); // Get the selected age range
@@ -113,6 +120,7 @@ if(session.getAttribute("name")!=null)
 		if (ageSel == null) {
 			ageSel = "All Ages"; // Set the default to be All Ages
 		}
+
 		//Parse the selected age range to grab the upper and lower bounds
 		if (!ageSel.equals("All Ages")) {
 			dash = ageSel.indexOf("-");
@@ -122,9 +130,12 @@ if(session.getAttribute("name")!=null)
 			if(!upperStr.equals("")){
 				upperAge = Integer.parseInt(upperStr);
 				upperAgeFilter = "u.age < " + upperAge;
+				session.setAttribute("upperAgeFilter", upperAgeFilter);
 			}
 			lowerAgeFilter = "u.age >= " + lowerAge;	
+			session.setAttribute("lowerAgeFilter", lowerAgeFilter);
 		}
+
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -136,7 +147,7 @@ if(session.getAttribute("name")!=null)
 		{
 			// If States and All Ages are selected
 			if (rowsTitle.equals("States") && ageSel.equals("All Ages")) {
-				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20 OFFSET " + (nextRows*20);
+				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			}
 			// If States and some specified range of ages are selected
 			else if (rowsTitle.equals("States") && !ageSel.equals("All Ages")) {
@@ -173,8 +184,13 @@ if(session.getAttribute("name")!=null)
 	<input type="hidden">&nbsp;</>
 	Rows:
 	<SELECT name="rowTitle">
-		<OPTION value="Customers">Customers</OPTION>
-		<OPTION value="States">States</OPTION>
+		<% if(rowsTitle.equals("States")){%>
+			<OPTION value="Customers">Customers</OPTION>
+			<OPTION value="States" selected>States</OPTION>
+		<%} else{%>
+			<OPTION value="Customers" selected>Customers</OPTION>
+			<OPTION value="States">States</OPTION>
+		<%}%>
 	</SELECT>
 	State:
 	<SELECT NAME="state">
@@ -207,11 +223,10 @@ if(session.getAttribute("name")!=null)
 
 <br>
 
-
 <%		
 		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
-			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
+			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10 OFFSET "+(nextProds*10);
 			prodSpentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN" + " categories c ON (p.cid = c.id) LEFT OUTER JOIN sales s ON (p.id = s.pid) " + 
 			"LEFT OUTER JOIN users u ON (s.uid = u.id) WHERE "+stateFilter+" AND "+categoryFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
