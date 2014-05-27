@@ -299,7 +299,7 @@ if(session.getAttribute("name")!=null)
 			// If the rows selection was States and a state was specified
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
-				//tempState = name; // Store the state temporarily
+				tempState = name; // Store the state temporarily
 				//stateSel = "All States";
 				temp = i; // Store the index
 				i = 20; // Essentially break out of the loop
@@ -335,82 +335,25 @@ if(session.getAttribute("name")!=null)
 			//prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 			prodSpentRS.first();
 		 	// Iterate through the number of products retrieved by query
-			//for (int j = 0; j < prodIndex; j++) {
-			    String spentSQL = "";
-			    if (rowsTitle.equals("States")) {
-			    	/*if (ageSel.equals("All Ages")) {
-				    	spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
-				    	+ " u.state = '"+tempState+"' AND s.uid = u.id AND p.id = "+prodID[j]+
-				    	" AND s.pid = p.id GROUP BY u.state";
-				 	} else if (lowerAge == 65) {
-				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
-				    	+ " u.state = '"+tempState+"' AND s.uid = u.id AND p.id = "+prodID[j]+
-				    	" AND s.pid = p.id AND u.age >= "+lowerAge+" GROUP BY u.state";
-				 	} else {
-				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, products p WHERE" 
-				    	+ " u.state = '"+tempState+"' AND s.uid = u.id AND p.id = "+prodID[j]+
-				    	" AND s.pid = p.id AND u.age >= "+lowerAge+" AND age < "+upperAge+" GROUP BY u.state";
-				 	}*/
-				 	spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "products p WHERE u.id = "+uID+" AND s.uid = u.id AND s.pid = p.id " + 
-				 	"GROUP BY p.id ORDER BY p.name";
+		    String spentSQL = "";
+		    if (rowsTitle.equals("States")) {
+			 	spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.state = '"+tempState+"' AND s.uid = u.id AND "+ 
+			 	"s.pid = p.id AND c.id = p.cid AND "+categoryFilter+" AND "+lowerAgeFilter+
+			 	" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
+			}
+		 	else {
+			 	spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.id = "+uID+" AND s.uid = u.id AND s.pid = p.id AND "+"c.id = p.cid AND " +categoryFilter+" AND "+lowerAgeFilter+" AND "+upperAgeFilter+
+			 	" GROUP BY p.id ORDER BY p.name";
+		 	}
+		 	spentRS = stmt3.executeQuery(spentSQL);
+		 	for (int j = 0; j < prodNames.size(); j++) {
+				if (spentRS.next() && prodNames.get(j).equals(spentRS.getString(2))) {	
+					out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
+				} else {
+					spentRS.previous();
+					out.print("<td width=\"8%\">$0</td>");
 				}
-			 	else {
-			 		/*if (ageSel.equals("All Ages")) {
-			 			spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
-			 			"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id";
-				 	} else if (lowerAge == 65) {
-				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
-			 			"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id AND u.age >= "+lowerAge+" AND age < "+upperAge;
-				 	} else {
-				 		spentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s, "+
-			 			"products p WHERE u.id = "+uID+" AND s.uid = u.id AND p.id = "+prodID[j]+" AND s.pid = p.id AND u.age >= "+lowerAge;
-				 	}*/
-				 	out.println(uID);
-				 	spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.id = "+uID+" AND s.uid = u.id AND s.pid = p.id AND "+"c.id = p.cid AND " +categoryFilter+" GROUP BY p.id ORDER BY p.name";
-			 	}
-			 	spentRS = stmt3.executeQuery(spentSQL);
-			 	//out.println(uID);
-			 	//spentRS.next();
-			 	/*while (spentRS.next()) {
-			 		while (prodSpentRS.next()) {
-			 			if (prodSpentRS.getString(2).equals(spentRS.getString(2))) {
-			 				out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
-			 			} else {
-			 				out.print("<td width=\"8%\">$0</td>");
-			 			}
-			 		}
-			 		/*if (spentRS.next() && prodSpentRS.getString(2).equals(spentRS.getString(2))) {
-			 			out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
-			 			//spentRS.next();
-			 		} else {
-			 			out.print("<td width=\"8%\">$0</td>");
-			 		}
-			 		prodSpentRS.first();
-			 	}*/
-			 	//spentRS.next();
-			 	for (int j = 0; j < prodNames.size(); j++) {
-					if (spentRS.next() && prodNames.get(j).equals(spentRS.getString(2))) {	
-						out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
-					} else {
-						spentRS.previous();
-						out.print("<td width=\"8%\">$0</td>");
-					}
-				}
-			 	/*while (prodSpentRS.next()) {
-			 		if (spentRS.next() && prodSpentRS.getString(2).equals(spentRS.getString(2))) {
-			 			out.println("Product: "+ prodSpentRS.getString(2));
-			 			out.println("Spent: " + spentRS.getString(2));
-			 			//spentRS.previous();
-			 			out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
-			 			//spentRS.next();
-			 		} else {
-			 			out.println("ProductF: "+ prodSpentRS.getString(2));
-			 			out.println("SpentF: " + spentRS.getString(2));
-			 			spentRS.previous();
-			 			out.print("<td width=\"8%\">$0</td>");
-			 		}
-			 	}*/
-			 //}
+			}
 			 i++; // Increment index
 			 temp = i; // Store the index
 		}
