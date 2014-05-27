@@ -43,7 +43,7 @@ if(session.getAttribute("name")!=null)
 			stmt3 = conn.createStatement();
 			stmt4 = conn.createStatement();
 			stmt5 = conn.createStatement();
-			stmt6 = conn.createStatement();
+			stmt6 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			ResultSet rs=null;
 			ResultSet prodRS=null;
 			ResultSet spentRS = null;
@@ -52,6 +52,7 @@ if(session.getAttribute("name")!=null)
 			ResultSet prodSpentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
+			String prodSpentSQL = "";
 			int c_id=0;
 		%>
 
@@ -71,6 +72,7 @@ if(session.getAttribute("name")!=null)
 		String stateSel = "All States";
 		String category = "All Categories";
 		String ageSel = "All Ages";
+		String stateFilter = "TRUE", lowerAgeFilter = "TRUE", upperAgeFilter = "TRUE", categoryFilter = "TRUE";
 		String nextProdsStr = request.getParameter("Next 10 Products");
 		String nextRowsStr = request.getParameter("Next 20 Rows");
 		// Update count for number of times next buttons have been clicked
@@ -91,11 +93,17 @@ if(session.getAttribute("name")!=null)
 		stateSel = request.getParameter("state"); // Get the selected state
 		if (stateSel == null) {
 			stateSel = "All States"; // Set default to be All States
+		} else {
+			stateFilter = "u.state = '" + stateSel + "'";
 		}
+		if (stateSel.equals("All States")) stateFilter = "TRUE";
 		category = request.getParameter("category"); // Get the selected category
 		if (category == null) {
 			category = "All Categories"; // Set the default to be All Categories
+		} else {
+			categoryFilter = "c.name = '" + category + "'";
 		}
+		if (category.equals("All Categories")) categoryFilter = "TRUE";
 		ageSel = request.getParameter("age"); // Get the selected age range
 		int upperAge = 0; 
 		int lowerAge = 0;
@@ -104,7 +112,7 @@ if(session.getAttribute("name")!=null)
 		int dash = -1;
 		if (ageSel == null) {
 			ageSel = "All Ages"; // Set the default to be All Ages
-		} 
+		}
 		//Parse the selected age range to grab the upper and lower bounds
 		if (!ageSel.equals("All Ages")) {
 			dash = ageSel.indexOf("-");
@@ -113,7 +121,9 @@ if(session.getAttribute("name")!=null)
 			lowerAge = Integer.parseInt(lowerStr);
 			if(!upperStr.equals("")){
 				upperAge = Integer.parseInt(upperStr);
-			}		
+				upperAgeFilter = "u.age < " + upperAge;
+			}
+			lowerAgeFilter = "u.age >= " + lowerAge;	
 		}
 
 	   String c_id_str=null,key=null;
@@ -202,12 +212,19 @@ if(session.getAttribute("name")!=null)
 		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
 			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
+			prodSpentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN" + " categories c ON (p.cid = c.id) LEFT OUTER JOIN sales s ON (p.id = s.pid) " + 
+			"LEFT OUTER JOIN users u ON (s.uid = u.id) WHERE "+stateFilter+" AND "+categoryFilter+" AND "
+			+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
 			category = "c.name";
 		} else { // Category is specified
 			category = "'"+category+"'";
 			prodSQL="SELECT p.id, p.name FROM products p, categories c WHERE c.name= "+category+" AND c.id=p.cid ORDER BY p.name LIMIT 10";
+			prodSpentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN" + " categories c ON (p.cid = c.id) LEFT OUTER JOIN sales s ON (p.id = s.pid) " + 
+			"LEFT OUTER JOIN users u ON (s.uid = u.id) WHERE "+stateFilter+" AND "+categoryFilter+" AND "
+			+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
 		}
 		prodRS=stmt2.executeQuery(prodSQL);
+		prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 		rs=stmt.executeQuery(SQL);
 
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
@@ -228,9 +245,9 @@ if(session.getAttribute("name")!=null)
 			}
 			// Truncate the product name to only 10 characters
 		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
-		    String prodSpentSQL = "";
+		    //String prodSpentSQL = "";
 		    // If no age filter was specified
-		    if (ageSel.equals("All Ages")) {
+		    /*if (ageSel.equals("All Ages")) {
 			    prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
 			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND p.cid = c.id AND c.name = "+category+
 			    " GROUP BY p.id ORDER BY p.name";
@@ -242,14 +259,22 @@ if(session.getAttribute("name")!=null)
 				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
 			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+" AND u.age < "+upperAge+
 			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
-			}
-		    prodSpentRS = stmt6.executeQuery(prodSpentSQL);
+			}*/
+		    //prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 		    float prodSpentTot = 0;
-		    if (prodSpentRS.next()) // There was some money spent on that product
-		    	prodSpentTot = prodSpentRS.getFloat(2);
+		    while (prodSpentRS.next()) {
+		    	if (prodSpentRS.getString(2).equals(prodName)) {
+		    		prodSpentTot = prodSpentRS.getFloat(3);
+		    		break;
+		    	}
+		    	//delete row
+			}
+			prodSpentRS.first();
+		    //if (prodSpentRS.next()) // There was some money spent on that product
+		    //	prodSpentTot = prodSpentRS.getFloat(2);
 			out.println("<td width=\"8%\"><B>"+truncProdName+"<br/>($"+prodSpentTot+")</B></td>");
-			prodID[prodIndex] = id; // Store the product id
-			prodIndex++; // Increment the index for later use
+			//prodID[prodIndex] = id; // Store the product id
+			//prodIndex++; // Increment the index for later use
 		}
 		int id=0; // Store the id
 		int uID = 0; // Store the user id
