@@ -30,7 +30,8 @@ if(session.getAttribute("name")!=null)
 		Connection conn=null;
 		Statement stmt, stmt2, stmt3, stmt4, stmt5, stmt6;
 		String SQL=null;
-		String prodSQL=null;
+		String prodSQL=null, prodSpentSQL = "";
+		String customerSpentSQL = "", stateSpentSQL = "";
 		try
 		{
 			try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
@@ -41,8 +42,8 @@ if(session.getAttribute("name")!=null)
 			stmt =conn.createStatement();
 			stmt2 =conn.createStatement();
 			stmt3 = conn.createStatement();
-			stmt4 = conn.createStatement();
-			stmt5 = conn.createStatement();
+			stmt4 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			stmt5 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			stmt6 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			ResultSet rs=null;
 			ResultSet prodRS=null;
@@ -52,7 +53,6 @@ if(session.getAttribute("name")!=null)
 			ResultSet prodSpentRS = null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
 			String c_name=null;
-			String prodSpentSQL = "";
 			int c_id=0;
 		%>
 
@@ -145,12 +145,12 @@ if(session.getAttribute("name")!=null)
 			// Customers are selected
 			else {
 				// If state selected is All States
-				if(stateSel != null && stateSel.equals("All States")) {
+				//if(stateSel != null && stateSel.equals("All States")) {
 					SQL="SELECT id, name FROM users ORDER BY name asc LIMIT 20";
-				} else { // There was some specified state
-					SQL="SELECT id, name FROM users WHERE state = '"+stateSel+ 
-					"' ORDER BY name asc LIMIT 20";
-				}
+				//} else { // There was some specified state
+				//	SQL="SELECT id, name FROM users WHERE state = '"+stateSel+ 
+				//	"' ORDER BY name asc LIMIT 20";
+				//}
 			}
 		}
 		else
@@ -245,33 +245,14 @@ if(session.getAttribute("name")!=null)
 			}
 			// Truncate the product name to only 10 characters
 		    String truncProdName = prodName.substring(0, Math.min(prodName.length(), 10));
-		    //String prodSpentSQL = "";
-		    // If no age filter was specified
-		    /*if (ageSel.equals("All Ages")) {
-			    prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
-			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND p.cid = c.id AND c.name = "+category+
-			    " GROUP BY p.id ORDER BY p.name";
-			} else if (lowerAge == 65) { // The range of 65- for age was selected
-				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
-			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+
-			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
-			} else { // All other ranges for ages
-				prodSpentSQL = "SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, "
-			    + " users u, categories c WHERE p.id = s.pid AND p.name = '"+prodName+"' AND u.state = "+stateTemp+" AND u.id = s.uid AND u.age >= "+lowerAge+" AND u.age < "+upperAge+
-			    " AND p.cid = c.id AND c.name = "+category+" GROUP BY p.id ORDER BY p.name";
-			}*/
-		    //prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 		    float prodSpentTot = 0;
 		    while (prodSpentRS.next()) {
 		    	if (prodSpentRS.getString(2).equals(prodName)) {
 		    		prodSpentTot = prodSpentRS.getFloat(3);
 		    		break;
 		    	}
-		    	//delete row
 			}
 			prodSpentRS.first();
-		    //if (prodSpentRS.next()) // There was some money spent on that product
-		    //	prodSpentTot = prodSpentRS.getFloat(2);
 			out.println("<td width=\"8%\"><B>"+truncProdName+"<br/>($"+prodSpentTot+")</B></td>");
 			//prodID[prodIndex] = id; // Store the product id
 			//prodIndex++; // Increment the index for later use
@@ -284,9 +265,26 @@ if(session.getAttribute("name")!=null)
 		int temp = i; // Store index temporarily
 		float stateSpentTot = 0; // Total amount spent by the state
 		float customerSpentTot = 0; // Total amount spent by the customer
+
+		if (rowsTitle.equals("States")) {
+			stateSpentSQL = "SELECT u.state, COALESCE(SUM(s.quantity*s.price),0) FROM "
+			+ "users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON "
+			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
+			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.state "
+			+ "ORDER BY u.state";
+			stateSpentRS = stmt4.executeQuery(stateSpentSQL);
+		} else { // Dealing with customers
+			customerSpentSQL = "SELECT u.id, u.name, COALESCE(SUM(s.quantity*s.price),0) FROM "
+			+ "users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON "
+			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
+			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.id "
+			+ "ORDER BY u.name";
+			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
+		}
+
 		// If the rows selected is states, then show the first 20 states
 		// otherwise traverse through the products
-		while((rowsTitle.equals("States") ? (i < 20) : (rs.next()))) {
+		while((rowsTitle.equals("States") ? (i < 20) : (customerSpentRS.next()))) {
 			// If the state was not specified and rows selection was States
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
@@ -295,60 +293,27 @@ if(session.getAttribute("name")!=null)
 			// If the rows selection was States and a state was specified
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
 				name = stateSel;
-				tempState = name; // Store the state temporarily
-				stateSel = "All States";
+				//tempState = name; // Store the state temporarily
+				//stateSel = "All States";
 				temp = i; // Store the index
 				i = 20; // Essentially break out of the loop
 			}
-		 	else { // Rows selection was Customer
-		 		name = rs.getString(2); // Get the name of the product
-		 	}
-			String stateSpentSQL = "";
 			// If the rows selection was States
+			stateSpentTot = 0;
 			if (rowsTitle.equals("States")) {
-			 	if (ageSel.equals("All Ages")) {
-			 		stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
-			 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
-			 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.state";
-			 	} else if (lowerAge == 65) {
-			 		stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
-				 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
-				 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND " +
-				 	"u.age >= "+lowerAge+" GROUP BY u.state";
-			 	} else {
-				 	stateSpentSQL = "SELECT SUM(s.quantity*s.price) FROM users u, sales s,"
-				 	+ " categories c, products p WHERE u.state = '"+tempState+"' AND u.id = s.uid AND "
-				 	+ "s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND " +
-				 	"u.age >= "+lowerAge+" AND age < "+upperAge+" GROUP BY u.state";
-			 	}
-			 	stateSpentRS = stmt4.executeQuery(stateSpentSQL);
-			 	if (stateSpentRS.next()) {
-			 		stateSpentTot = stateSpentRS.getFloat(1);
-			 	} 
-			 	else {
-			 		stateSpentTot = 0;
-			 	}
+				name = states[temp];
+				while (stateSpentRS.next()) {
+			    	if (stateSpentRS.getString(1).equals(name)) {
+			    		stateSpentTot = stateSpentRS.getFloat(2);
+			    		break;
+			    	}
+				}
+				stateSpentRS.first();
 			 }
-			 else {
-			    uID = rs.getInt(1); // Get the user id
-			 	name = rs.getString(2); // Get the user name
-			 	String customerSpentSQL = "";
-			 	if (ageSel.equals("All Ages")) {
-			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" GROUP BY u.name";
-			 	} else if (lowerAge == 65) {
-			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND u.age >= "+lowerAge+
-			 		" GROUP BY u.name";
-			 	} else {
-			 		customerSpentSQL = "SELECT SUM(s.quantity * s.price) FROM users u, sales s, categories c, products p WHERE u.name = '"+name+"' AND u.id = s.uid AND s.pid = p.id AND p.cid = c.id AND c.name = "+category+" AND u.age >= "+lowerAge+" AND age < "+upperAge+" GROUP BY u.name";
-			 	}
-			 	customerSpentRS = stmt5.executeQuery(customerSpentSQL);
-			 	if(customerSpentRS.next()){
-			 	    customerSpentTot = customerSpentRS.getFloat(1);
-			 	}
-			 	else{
-			 	    customerSpentTot = 0;
-			 	}
-			 }
+			 else { // If the rows selection was Customers
+			 	name = customerSpentRS.getString(2); // Get the user name
+			    customerSpentTot = customerSpentRS.getFloat(3);
+			}
 			 	
 		 	// If the rows selection was States then display state and total spent by that state
 		 	if(rowsTitle.equals("States")){
