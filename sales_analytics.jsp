@@ -93,19 +93,22 @@ if(session.getAttribute("name")!=null)
 			session.setAttribute("nextRows", nextRows);
 			session.setAttribute("rowsTitle", rowsTitle);
 		}
+		
+		
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 			session.setAttribute("rowsTitle", rowsTitle);
 			
-		} else if(session.getAttribute("rowsTitle").equals("States")){
+		} else if(session.getAttribute("rowsTitle") != null && session.getAttribute("rowsTitle").equals("States")){
 			rowsTitle = "States";
-		} 
-
+		}
 		else {
 			rowsTitle = "Customers"; // Set default to be Customers
 			session.setAttribute("rowsTitle", rowsTitle);
 		}
+		
+		
 		stateSel = request.getParameter("state"); // Get the selected state
 		if (stateSel == null) {
 			stateSel = "All States"; // Set default to be All States
@@ -113,6 +116,8 @@ if(session.getAttribute("name")!=null)
 			stateFilter = "u.state = '" + stateSel + "'";
 			session.setAttribute("stateFilter", stateFilter);
 		}
+		
+		
 		if (stateSel.equals("All States")) stateFilter = "TRUE";
 		category = request.getParameter("category"); // Get the selected category
 		if (category == null) {
@@ -138,6 +143,8 @@ if(session.getAttribute("name")!=null)
 			lowerStr = ageSel.substring(0, dash);
 			upperStr = ageSel.substring(dash+1, ageSel.length());
 			lowerAge = Integer.parseInt(lowerStr);
+			
+			//if not "65-"
 			if(!upperStr.equals("")){
 				upperAge = Integer.parseInt(upperStr);
 				upperAgeFilter = "u.age < " + upperAge;
