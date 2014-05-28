@@ -22,7 +22,7 @@ if(session.getAttribute("name")!=null)
 	int nextProds = (Integer)session.getAttribute("nextProds");
 	int nextRows = (Integer)session.getAttribute("nextRows");
 	
-	out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
+	//out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
 	
 %>
 
@@ -87,10 +87,12 @@ if(session.getAttribute("name")!=null)
 		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
 			nextProds++;
 			session.setAttribute("nextProds", nextProds);
+			session.setAttribute("nextRows", nextRows);
 		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
 				|| nextRowsStr.equals("Next 20 States"))) {
 			nextRows++;
 			session.setAttribute("nextRows", nextRows);
+			session.setAttribute("nextProds", nextProds);
 			session.setAttribute("rowsTitle", rowsTitle);
 		}
 		
@@ -198,49 +200,50 @@ if(session.getAttribute("name")!=null)
 			}
 		}
 %>
-<form action="sales_analytics.jsp">
-	<input type="hidden">&nbsp;</>
-	Rows:
-	<SELECT name="rowTitle">
-		<% if(rowsTitle.equals("States")){%>
-			<OPTION value="Customers">Customers</OPTION>
-			<OPTION value="States" selected>States</OPTION>
-		<%} else{%>
-			<OPTION value="Customers" selected>Customers</OPTION>
-			<OPTION value="States">States</OPTION>
-		<%}%>
-	</SELECT>
-	State:
-	<SELECT NAME="state">
-	   <OPTION value-="All States">All States</OPTION>
-	   <%for (int i = 0; i < states.length; i++) {%>
-	   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
-	   <%}%>
-	</SELECT>
-	Category:
-	<SELECT name="category">
-		<OPTION value="All Categories">All Categories</OPTION>
-		<%
-		while (rs.next()) { %>
-			<OPTION value="<%=rs.getString(2)%>"><%=rs.getString(2)%></OPTION>
-		<%
-		}
-		%>
+<% if(nextProds == 0 && nextRows == 0){%>
+	<form action="sales_analytics.jsp">
+		<input type="hidden">&nbsp;</>
+		Rows:
+		<SELECT name="rowTitle">
+			<% if(rowsTitle.equals("States")){%>
+				<OPTION value="Customers">Customers</OPTION>
+				<OPTION value="States" selected>States</OPTION>
+			<%} else{%>
+				<OPTION value="Customers" selected>Customers</OPTION>
+				<OPTION value="States">States</OPTION>
+			<%}%>
+		</SELECT>
+		State:
+		<SELECT NAME="state">
+		   <OPTION value-="All States">All States</OPTION>
+		   <%for (int i = 0; i < states.length; i++) {%>
+		   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
+		   <%}%>
+		</SELECT>
+		Category:
+		<SELECT name="category">
+			<OPTION value="All Categories">All Categories</OPTION>
+			<%
+			while (rs.next()) { %>
+				<OPTION value="<%=rs.getString(2)%>"><%=rs.getString(2)%></OPTION>
+			<%
+			}
+			%>
 
-	</SELECT>
-	Age:
-	<SELECT name="age">
-		<OPTION value="All Ages">All Ages</OPTION>
-		<OPTION value="12-18">12-18</OPTION>
-		<OPTION value="18-45">18-45</OPTION>
-		<OPTION value="45-65">45-65</OPTION>
-		<OPTION value="65-">65-</OPTION>
-	</SELECT>
-	<input type="submit" name="runQuery" value="Run Query"/>
-</form>
+		</SELECT>
+		Age:
+		<SELECT name="age">
+			<OPTION value="All Ages">All Ages</OPTION>
+			<OPTION value="12-18">12-18</OPTION>
+			<OPTION value="18-45">18-45</OPTION>
+			<OPTION value="45-65">45-65</OPTION>
+			<OPTION value="65-">65-</OPTION>
+		</SELECT>
+		<input type="submit" name="runQuery" value="Run Query"/>
+	</form>
 
-<br>
-
+	<br>
+<%}%>
 <%		
 		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
