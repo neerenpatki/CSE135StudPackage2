@@ -80,6 +80,7 @@ if(session.getAttribute("name")!=null)
 		String nextRowsStr = request.getParameter("Next 20 Rows");
 		ArrayList<String> prodNames = new ArrayList<String>();
 
+		//TODO DELETE THESE ONLY FOR RESETTING
 		session.setAttribute("nextProds", 0);
 		session.setAttribute("nextRows", 0);
 
@@ -314,8 +315,8 @@ if(session.getAttribute("name")!=null)
 
 			spentSQL = "SELECT p.id, p.name, u.state, SUM(s.quantity*s.price) FROM "
 			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
-			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id"+
-			" GROUP BY u.state, p.id ORDER BY u.state";
+			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND "+lowerAgeFilter+
+			" AND "+upperAgeFilter+" GROUP BY u.state, p.id ORDER BY u.state";
 			spentRS = stmt3.executeQuery(spentSQL);
 		} else { // Dealing with customers
 			customerSpentSQL = "SELECT u.id, u.name, COALESCE(SUM(s.quantity*s.price),0) FROM "
