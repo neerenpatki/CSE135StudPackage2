@@ -315,7 +315,7 @@ if(session.getAttribute("name")!=null)
 			+ "ORDER BY u.name";
 			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
-			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name");
+			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
 		}
 
 		// If the rows selected is states, then show the first 20 states
