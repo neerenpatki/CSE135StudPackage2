@@ -323,7 +323,7 @@ if(session.getAttribute("name")!=null)
 			+ "users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON "
 			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
 			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.id "
-			+ "ORDER BY u.name";
+			+ "ORDER BY u.name LIMIT 20 OFFSET " +(nextRows*20);
 			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
@@ -354,14 +354,13 @@ if(session.getAttribute("name")!=null)
 			// If the rows selection was States
 			stateSpentTot = 0;
 			if (rowsTitle.equals("States")) {
-				//name = states[temp];
 				while (stateSpentRS.next()) {
-			    	if (stateSpentRS.getString(1).equals(name)) {
+			    	if (name.equals(stateSpentRS.getString(1))) {
 			    		stateSpentTot = stateSpentRS.getFloat(2);
 			    		break;
 			    	}
 				}
-				stateSpentRS.first();
+				stateSpentRS.beforeFirst();
 				out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
 			 }
 			 else { // If the rows selection was Customers
