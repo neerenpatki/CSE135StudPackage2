@@ -290,7 +290,7 @@ if(session.getAttribute("name")!=null)
 		    		break;
 		    	}
 			}
-			prodSpentRS.first();
+			prodSpentRS.beforeFirst();
 			out.println("<td width=\"8%\"><B>"+truncProdName+"<br/>($"+prodSpentTot+")</B></td>");
 			//prodID[prodIndex] = id; // Store the product id
 			//prodIndex++; // Increment the index for later use
@@ -379,7 +379,7 @@ if(session.getAttribute("name")!=null)
 			 	//name = customerSpentRS.getString(2); // Get the user name
 			}
 			//prodSpentRS = stmt6.executeQuery(prodSpentSQL);
-			prodSpentRS.first();
+			prodSpentRS.beforeFirst();
 		 	// Iterate through the number of products retrieved by query
 
 		 	ArrayList<String> prodsBought = new ArrayList<String>();
@@ -398,7 +398,7 @@ if(session.getAttribute("name")!=null)
 			 		}
 		 		}
 		 	}
-		 	spentRS.first();
+		 	spentRS.beforeFirst();
 		 	for (int j = 0; j < prodNames.size(); j++) {
 		 		boolean notFound = true;
 		 		for (int k = 0; k < prodsBought.size(); k++) {
