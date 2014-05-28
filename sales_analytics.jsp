@@ -327,12 +327,10 @@ if(session.getAttribute("name")!=null)
 			// If the state was not specified and rows selection was States
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
-		out.println(i);
 				tempState = name;
 			}
 			// If the rows selection was States and a state was specified
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
-			out.println("here2");
 				name = stateSel;
 				tempState = name; // Store the state temporarily
 				//stateSel = "All States";
