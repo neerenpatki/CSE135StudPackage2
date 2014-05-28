@@ -80,6 +80,7 @@ if(session.getAttribute("name")!=null)
 		String nextRowsStr = request.getParameter("Next 20 Rows");
 		ArrayList<String> prodNames = new ArrayList<String>();
 
+		//TODO DELETE THESE ONLY FOR RESETTING
 		session.setAttribute("nextProds", 0);
 		session.setAttribute("nextRows", 0);
 
@@ -302,6 +303,7 @@ if(session.getAttribute("name")!=null)
 		int temp = i; // Store index temporarily
 		float stateSpentTot = 0; // Total amount spent by the state
 		float customerSpentTot = 0; // Total amount spent by the customer
+		String spentSQL = "";
 
 		if (rowsTitle.equals("States")) {
 			stateSpentSQL = "SELECT u.state, COALESCE(SUM(s.quantity*s.price),0) FROM "
@@ -310,6 +312,12 @@ if(session.getAttribute("name")!=null)
 			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.state "
 			+ "ORDER BY u.state";
 			stateSpentRS = stmt4.executeQuery(stateSpentSQL);
+
+			spentSQL = "SELECT p.id, p.name, u.state, SUM(s.quantity*s.price) FROM "
+			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
+			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND "+lowerAgeFilter+
+			" AND "+upperAgeFilter+" GROUP BY u.state, p.id ORDER BY u.state";
+			spentRS = stmt3.executeQuery(spentSQL);
 		} else { // Dealing with customers
 			customerSpentSQL = "SELECT u.id, u.name, COALESCE(SUM(s.quantity*s.price),0) FROM "
 			+ "users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON "
@@ -319,6 +327,12 @@ if(session.getAttribute("name")!=null)
 			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
+
+			spentSQL = "SELECT p.id, p.name, u.name, SUM(s.quantity*s.price) FROM "
+			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
+			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id"+
+			" GROUP BY u.name, p.id ORDER BY u.name";
+			spentRS = stmt3.executeQuery(spentSQL);
 		}
 
 		// If the rows selected is states, then show the first 20 states
@@ -340,7 +354,7 @@ if(session.getAttribute("name")!=null)
 			// If the rows selection was States
 			stateSpentTot = 0;
 			if (rowsTitle.equals("States")) {
-				name = states[temp];
+				//name = states[temp];
 				while (stateSpentRS.next()) {
 			    	if (stateSpentRS.getString(1).equals(name)) {
 			    		stateSpentTot = stateSpentRS.getFloat(2);
@@ -368,27 +382,39 @@ if(session.getAttribute("name")!=null)
 			//prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 			prodSpentRS.first();
 		 	// Iterate through the number of products retrieved by query
-		    String spentSQL = "";
-		    if (rowsTitle.equals("States")) {
-			 	spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.state = '"+tempState+"' AND s.uid = u.id AND "+ 
-			 	"s.pid = p.id AND c.id = p.cid AND "+categoryFilter+" AND "+lowerAgeFilter+
-			 	" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
-			}
-		 	else {
-			 	spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.id = "+uID+" AND s.uid = u.id AND s.pid = p.id AND "+"c.id = p.cid AND " +categoryFilter+" AND "+lowerAgeFilter+" AND "+upperAgeFilter+
-			 	" GROUP BY p.id ORDER BY p.name";
+
+		 	ArrayList<String> prodsBought = new ArrayList<String>();
+		 	ArrayList<Float> prodsPrice = new ArrayList<Float>();
+		 	while (spentRS.next()) {
+		 		if (rowsTitle.equals("States")) {
+		 			//out.println(name);
+		 			if (name.equals(spentRS.getString(3))) {
+		 				prodsBought.add(spentRS.getString(2));
+			 			prodsPrice.add(spentRS.getFloat(4));
+		 			}
+		 		} else {
+			 		if (customersRS.getString(2).equals(spentRS.getString(3))) {
+			 			prodsBought.add(spentRS.getString(2));
+			 			prodsPrice.add(spentRS.getFloat(4));
+			 		}
+		 		}
 		 	}
-		 	spentRS = stmt3.executeQuery(spentSQL);
+		 	spentRS.first();
 		 	for (int j = 0; j < prodNames.size(); j++) {
-				if (spentRS.next() && prodNames.get(j).equals(spentRS.getString(2))) {	
-					out.print("<td width=\"8%\">$"+spentRS.getFloat(3)+"</td>");
-				} else {
-					spentRS.previous();
-					out.print("<td width=\"8%\">$0</td>");
-				}
-			}
-			 i++; // Increment index
-			 temp = i; // Store the index
+		 		boolean notFound = true;
+		 		for (int k = 0; k < prodsBought.size(); k++) {
+		 			if (prodNames.get(j).equals(prodsBought.get(k))) {
+		 				out.print("<td width=\"8%\">$"+prodsPrice.get(k)+"</td>");
+		 				notFound = false;
+		 				break;
+		 			}
+		 		}
+		 		if (notFound) {
+		 			out.print("<td width=\"8%\">$0</td>");
+		 		}
+		 	}
+			i++; // Increment index
+			temp = i; // Store the index
 		}
 		out.println("</table>");
 		out.println("<br/>");

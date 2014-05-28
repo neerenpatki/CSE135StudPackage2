@@ -5,10 +5,6 @@ SELECT p.id, p.name, u.name, SUM(s.quantity*s.price) FROM products p LEFT OUTER 
 sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id
 GROUP BY u.name, p.id ORDER BY u.name
 
-SELECT p.id, p.name, u.state, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN 
-sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND u.age >= 12 AND u.age < 18
-GROUP BY u.state, p.id ORDER BY u.state
-
 SELECT p.id, p.name FROM products p, categories c WHERE c.name=c.name AND c.id=p.cid ORDER BY p.name
 
 SELECT p.id, p.name, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN sales s ON (p.id = s.pid)
