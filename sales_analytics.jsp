@@ -21,7 +21,8 @@ if(session.getAttribute("name")!=null)
 	}
 	int nextProds = (Integer)session.getAttribute("nextProds");
 	int nextRows = (Integer)session.getAttribute("nextRows");
-	out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
+	
+	//out.println("Next rows: " + nextRows + " Next prods: " + nextProds);
 	
 %>
 
@@ -70,7 +71,7 @@ if(session.getAttribute("name")!=null)
 			"Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", 
 			"Wyoming" };
 		String action = request.getParameter("runQuery"); // Store action when query is ran
-		String rowsTitle = "";
+		String rowsTitle = (String)session.getAttribute("rowsTitle");
 		String stateSel = "All States";
 		String category = "All Categories";
 		String ageSel = "All Ages";
@@ -78,33 +79,54 @@ if(session.getAttribute("name")!=null)
 		String nextProdsStr = request.getParameter("Next 10 Products");
 		String nextRowsStr = request.getParameter("Next 20 Rows");
 		ArrayList<String> prodNames = new ArrayList<String>();
+
+		session.setAttribute("nextProds", 0);
+		session.setAttribute("nextRows", 0);
+
 		// Update count for number of times next buttons have been clicked
 		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
 			nextProds++;
 			session.setAttribute("nextProds", nextProds);
+			session.setAttribute("nextRows", nextRows);
 		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
 				|| nextRowsStr.equals("Next 20 States"))) {
 			nextRows++;
 			session.setAttribute("nextRows", nextRows);
+			session.setAttribute("nextProds", nextProds);
+			session.setAttribute("rowsTitle", rowsTitle);
 		}
+		
+		
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
-		} else {
-			rowsTitle = "Customers"; // Set default to be Customers
+			session.setAttribute("rowsTitle", rowsTitle);
+			
+		} else if(session.getAttribute("rowsTitle") != null && session.getAttribute("rowsTitle").equals("States")){
+			rowsTitle = "States";
 		}
+		else {
+			rowsTitle = "Customers"; // Set default to be Customers
+			session.setAttribute("rowsTitle", rowsTitle);
+		}
+		
+		
 		stateSel = request.getParameter("state"); // Get the selected state
 		if (stateSel == null) {
 			stateSel = "All States"; // Set default to be All States
 		} else {
 			stateFilter = "u.state = '" + stateSel + "'";
+			session.setAttribute("stateFilter", stateFilter);
 		}
+		
+		
 		if (stateSel.equals("All States")) stateFilter = "TRUE";
 		category = request.getParameter("category"); // Get the selected category
 		if (category == null) {
 			category = "All Categories"; // Set the default to be All Categories
 		} else {
 			categoryFilter = "c.name = '" + category + "'";
+			session.setAttribute("categoryFilter", categoryFilter);
 		}
 		if (category.equals("All Categories")) categoryFilter = "TRUE";
 		ageSel = request.getParameter("age"); // Get the selected age range
@@ -116,18 +138,24 @@ if(session.getAttribute("name")!=null)
 		if (ageSel == null) {
 			ageSel = "All Ages"; // Set the default to be All Ages
 		}
+
 		//Parse the selected age range to grab the upper and lower bounds
 		if (!ageSel.equals("All Ages")) {
 			dash = ageSel.indexOf("-");
 			lowerStr = ageSel.substring(0, dash);
 			upperStr = ageSel.substring(dash+1, ageSel.length());
 			lowerAge = Integer.parseInt(lowerStr);
+			
+			//if not "65-"
 			if(!upperStr.equals("")){
 				upperAge = Integer.parseInt(upperStr);
 				upperAgeFilter = "u.age < " + upperAge;
+				session.setAttribute("upperAgeFilter", upperAgeFilter);
 			}
 			lowerAgeFilter = "u.age >= " + lowerAge;	
+			session.setAttribute("lowerAgeFilter", lowerAgeFilter);
 		}
+
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -139,7 +167,7 @@ if(session.getAttribute("name")!=null)
 		{
 			// If States and All Ages are selected
 			if (rowsTitle.equals("States") && ageSel.equals("All Ages")) {
-				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20 OFFSET " + (nextRows*20);
+				SQL = "SELECT state FROM users ORDER BY state asc LIMIT 20";
 			}
 			// If States and some specified range of ages are selected
 			else if (rowsTitle.equals("States") && !ageSel.equals("All Ages")) {
@@ -172,49 +200,54 @@ if(session.getAttribute("name")!=null)
 			}
 		}
 %>
-<form action="sales_analytics.jsp">
-	<input type="hidden">&nbsp;</>
-	Rows:
-	<SELECT name="rowTitle">
-		<OPTION value="Customers">Customers</OPTION>
-		<OPTION value="States">States</OPTION>
-	</SELECT>
-	State:
-	<SELECT NAME="state">
-	   <OPTION value-="All States">All States</OPTION>
-	   <%for (int i = 0; i < states.length; i++) {%>
-	   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
-	   <%}%>
-	</SELECT>
-	Category:
-	<SELECT name="category">
-		<OPTION value="All Categories">All Categories</OPTION>
-		<%
-		while (rs.next()) { %>
-			<OPTION value="<%=rs.getString(2)%>"><%=rs.getString(2)%></OPTION>
-		<%
-		}
-		%>
+<% if(nextProds == 0 && nextRows == 0){%>
+	<form action="sales_analytics.jsp">
+		<input type="hidden">&nbsp;</>
+		Rows:
+		<SELECT name="rowTitle">
+			<% if(rowsTitle.equals("States")){%>
+				<OPTION value="Customers">Customers</OPTION>
+				<OPTION value="States" selected>States</OPTION>
+			<%} else{%>
+				<OPTION value="Customers" selected>Customers</OPTION>
+				<OPTION value="States">States</OPTION>
+			<%}%>
+		</SELECT>
+		State:
+		<SELECT NAME="state">
+		   <OPTION value-="All States">All States</OPTION>
+		   <%for (int i = 0; i < states.length; i++) {%>
+		   <OPTION value="<%=states[i]%>"><%=states[i]%></OPTION>
+		   <%}%>
+		</SELECT>
+		Category:
+		<SELECT name="category">
+			<OPTION value="All Categories">All Categories</OPTION>
+			<%
+			while (rs.next()) { %>
+				<OPTION value="<%=rs.getString(2)%>"><%=rs.getString(2)%></OPTION>
+			<%
+			}
+			%>
 
-	</SELECT>
-	Age:
-	<SELECT name="age">
-		<OPTION value="All Ages">All Ages</OPTION>
-		<OPTION value="12-18">12-18</OPTION>
-		<OPTION value="18-45">18-45</OPTION>
-		<OPTION value="45-65">45-65</OPTION>
-		<OPTION value="65-">65-</OPTION>
-	</SELECT>
-	<input type="submit" name="runQuery" value="Run Query"/>
-</form>
+		</SELECT>
+		Age:
+		<SELECT name="age">
+			<OPTION value="All Ages">All Ages</OPTION>
+			<OPTION value="12-18">12-18</OPTION>
+			<OPTION value="18-45">18-45</OPTION>
+			<OPTION value="45-65">45-65</OPTION>
+			<OPTION value="65-">65-</OPTION>
+		</SELECT>
+		<input type="submit" name="runQuery" value="Run Query"/>
+	</form>
 
-<br>
-
-
+	<br>
+<%}%>
 <%		
 		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
-			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10";
+			prodSQL="SELECT id, name FROM products ORDER BY name LIMIT 10 OFFSET "+(nextProds*10);
 			prodSpentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN" + " categories c ON (p.cid = c.id) LEFT OUTER JOIN sales s ON (p.id = s.pid) " + 
 			"LEFT OUTER JOIN users u ON (s.uid = u.id) WHERE "+stateFilter+" AND "+categoryFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
@@ -265,7 +298,7 @@ if(session.getAttribute("name")!=null)
 		int uID = 0; // Store the user id
 		String name="", SKU="", tempState = "";
 		float price=0;
-		int i = 0;
+		int i = nextRows*20;
 		int temp = i; // Store index temporarily
 		float stateSpentTot = 0; // Total amount spent by the state
 		float customerSpentTot = 0; // Total amount spent by the customer
@@ -292,7 +325,7 @@ if(session.getAttribute("name")!=null)
 			+ "ORDER BY u.name";
 			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
-			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name");
+			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
 
 			spentSQL = "SELECT p.id, p.name, u.name, SUM(s.quantity*s.price) FROM "
 			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
@@ -303,7 +336,7 @@ if(session.getAttribute("name")!=null)
 
 		// If the rows selected is states, then show the first 20 states
 		// otherwise traverse through the products
-		while((rowsTitle.equals("States") ? (i < 20) : (customersRS.next()))) {
+		while((rowsTitle.equals("States") ? (i < (Math.min(20+(nextRows*20), states.length))) : (customersRS.next()))) {
 			// If the state was not specified and rows selection was States
 			if(rowsTitle.equals("States") && stateSel.equals("All States")){
 				name = states[i];
@@ -320,7 +353,7 @@ if(session.getAttribute("name")!=null)
 			// If the rows selection was States
 			stateSpentTot = 0;
 			if (rowsTitle.equals("States")) {
-				name = states[temp];
+				//name = states[temp];
 				while (stateSpentRS.next()) {
 			    	if (stateSpentRS.getString(1).equals(name)) {
 			    		stateSpentTot = stateSpentRS.getFloat(2);
@@ -348,22 +381,16 @@ if(session.getAttribute("name")!=null)
 			//prodSpentRS = stmt6.executeQuery(prodSpentSQL);
 			prodSpentRS.first();
 		 	// Iterate through the number of products retrieved by query
-		    //String spentSQL = "";
-		    /*if (rowsTitle.equals("States")) {
-			 	/*spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.state = '"+tempState+"' AND s.uid = u.id AND "+ 
-			 	"s.pid = p.id AND c.id = p.cid AND "+categoryFilter+" AND "+lowerAgeFilter+
-			 	" AND "+upperAgeFilter+" GROUP BY p.id ORDER BY p.name";
-			}
-		 	else {
-			 	/*spentSQL = "SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, " + "categories c, products p WHERE u.id = "+uID+" AND s.uid = u.id AND s.pid = p.id AND "+"c.id = p.cid AND " +categoryFilter+" AND "+lowerAgeFilter+" AND "+upperAgeFilter+
-			 	" GROUP BY p.id ORDER BY p.name";
 
-		 	}*/
 		 	ArrayList<String> prodsBought = new ArrayList<String>();
 		 	ArrayList<Float> prodsPrice = new ArrayList<Float>();
 		 	while (spentRS.next()) {
 		 		if (rowsTitle.equals("States")) {
-		 			
+		 			//out.println(name);
+		 			if (name.equals(spentRS.getString(3))) {
+		 				prodsBought.add(spentRS.getString(2));
+			 			prodsPrice.add(spentRS.getFloat(4));
+		 			}
 		 		} else {
 			 		if (customersRS.getString(2).equals(spentRS.getString(3))) {
 			 			prodsBought.add(spentRS.getString(2));
