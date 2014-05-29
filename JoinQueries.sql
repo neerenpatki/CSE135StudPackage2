@@ -7,13 +7,13 @@ GROUP BY u.name, p.id ORDER BY u.name) AS T
 
 EXPLAIN ANALYZE VERBOSE
 SELECT p.id, p.name, u.name as user, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN 
-sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id WHERE p.name >= 'A_P1015' AND p.name <= 'A_P1242' AND 
-u.name >= 'A_user_10022' AND u.name <= 'A_user_10437'
+sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id WHERE p.name >= 'Apple Macbook' AND p.name <= 
+'Samsung Galaxy' AND u.name <= 'A_user_10437'
 GROUP BY u.name, p.id ORDER BY u.name
 
 SELECT p.id, p.name, u.state as user, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN 
-sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND TRUE AND TRUE WHERE p.name >= 'A_P5739' AND p.name <= 'Y_P3797'
-AND u.state = 'Alabama'
+sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND TRUE AND TRUE WHERE p.name >= 'Apple Macbook' AND p.name <= 
+'Samsung Galaxy'
 GROUP BY u.state, p.id ORDER BY u.state
 
 SELECT * FROM tempTable LIMIT 20
@@ -66,3 +66,19 @@ WHERE u.id = 5 AND s.uid = u.id AND s.pid = p.id AND c.id = p.cid AND c.name = '
 
 SELECT p.id, p.name, SUM(s.quantity*s.price) FROM users u, sales s, products p, categories c
 WHERE u.state = 'Alabama' AND s.uid = u.id AND s.pid = p.id AND c.id = p.cid AND c.name = 'Cell Phones' GROUP BY p.id ORDER BY p.name
+
+
+SELECT d.datname AS Name,  pg_catalog.pg_get_userbyid(d.datdba) AS Owner,
+    CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')
+        THEN pg_catalog.pg_size_pretty(pg_catalog.pg_database_size(d.datname))
+        ELSE 'No Access'
+    END AS Size
+FROM pg_catalog.pg_database d
+    ORDER BY
+    CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')
+        THEN pg_catalog.pg_database_size(d.datname)
+        ELSE NULL
+    END DESC -- nulls first
+    LIMIT 20
+
+SELECT * FROM sales

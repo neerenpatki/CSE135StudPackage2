@@ -19,8 +19,8 @@ public class DataGenerator
 	HashMap<Integer, Integer> hm=new HashMap<Integer, Integer>();
 	public static void main(String[] args) throws Exception
 	{
-		int Num_users		=	100000;
-		int Num_categories	=	1000;
+		int Num_users		=	100000000;
+		int Num_categories	=	100;
 		int Num_products	=	10000;
 		int Num_sales		=	1000000;
 		DataGenerator dg=new DataGenerator();

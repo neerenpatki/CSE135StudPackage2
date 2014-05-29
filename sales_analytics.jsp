@@ -421,6 +421,7 @@ if(session.getAttribute("name")!=null)
 			if (customerNames.size() == 0) {
 				customerNames.add("u.name");
 			}
+			//TODO add check for when comparing product names
 			if (prodNames.size() == 0) {
 				prodNames.add("p.name");
 			}
@@ -517,7 +518,7 @@ if(session.getAttribute("name")!=null)
 		 	for (int j = 0; j < prodNames.size(); j++) {
 		 		boolean notFound = true;
 		 		for (int k = 0; k < prodsBought.size(); k++) {
-		 			if (prodNames.get(j).equals(prodsBought.get(k))) {
+		 			if (prodNames.get(j).equals("'"+prodsBought.get(k)+"'")) {
 		 				out.print("<td width=\"8%\">$"+prodsPrice.get(k)+"</td>");
 		 				notFound = false;
 		 				break;

@@ -13,7 +13,7 @@ CREATE TABLE users (
     age   	INTEGER NOT NULL,
     state  	TEXT NOT NULL
 );
-INSERT INTO users (name, role, age, state) VALUES('CSE','owner',35,'california');
+INSERT INTO users (name, role, age, state) VALUES('CSE','owner',35,'California');
 INSERT INTO users (name, role, age, state) VALUES('David','customer',33,'New York');
 INSERT INTO users (name, role, age, state) VALUES('Floyd','customer',27,'Florida');
 INSERT INTO users (name, role, age, state) VALUES('James','customer',55,'Texas');
