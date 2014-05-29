@@ -83,25 +83,15 @@ if(session.getAttribute("name")!=null)
 		//TODO DELETE THESE ONLY FOR RESETTING
 		session.setAttribute("nextProds", 0);
 		session.setAttribute("nextRows", 0);
-
-		// Update count for number of times next buttons have been clicked
-		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
-			nextProds++;
-			session.setAttribute("nextProds", nextProds);
-			session.setAttribute("nextRows", nextRows);
-		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
-				|| nextRowsStr.equals("Next 20 States"))) {
-			nextRows++;
-			session.setAttribute("nextRows", nextRows);
-			session.setAttribute("nextProds", nextProds);
-			session.setAttribute("rowsTitle", rowsTitle);
-		}
-		
+		//session.setAttribute("stateSel", "All States");
+		//session.setAttribute("ageSel", "All Ages");
 		
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
 			session.setAttribute("rowsTitle", rowsTitle);
+			//session.setAttribute("stateFilter", stateFilter);
+			session.setAttribute("ageSel", request.getParameter("age"));
 			
 		} else if(session.getAttribute("rowsTitle") != null && session.getAttribute("rowsTitle").equals("States")){
 			rowsTitle = "States";
@@ -111,15 +101,13 @@ if(session.getAttribute("name")!=null)
 			session.setAttribute("rowsTitle", rowsTitle);
 		}
 		
-		
-		stateSel = request.getParameter("state"); // Get the selected state
+		stateSel = request.getParameter("state");
 		if (stateSel == null) {
 			stateSel = "All States"; // Set default to be All States
 		} else {
 			stateFilter = "u.state = '" + stateSel + "'";
-			session.setAttribute("stateFilter", stateFilter);
+			//session.setAttribute("stateFilter", stateFilter);
 		}
-		
 		
 		if (stateSel.equals("All States")) stateFilter = "TRUE";
 		category = request.getParameter("category"); // Get the selected category
@@ -129,8 +117,16 @@ if(session.getAttribute("name")!=null)
 			categoryFilter = "c.name = '" + category + "'";
 			session.setAttribute("categoryFilter", categoryFilter);
 		}
+
 		if (category.equals("All Categories")) categoryFilter = "TRUE";
-		ageSel = request.getParameter("age"); // Get the selected age range
+
+		if(session.getAttribute("ageSel") == null){
+			ageSel = request.getParameter("age"); // Get the selected age range
+		} else if(session.getAttribute("ageSel").equals("All Ages")){
+			ageSel = "All Ages";
+		} else{
+			ageSel = (String)session.getAttribute("ageSel");
+		}
 		int upperAge = 0; 
 		int lowerAge = 0;
 		String upperStr = "";
@@ -140,7 +136,6 @@ if(session.getAttribute("name")!=null)
 			ageSel = "All Ages"; // Set the default to be All Ages
 		}
 
-		//Parse the selected age range to grab the upper and lower bounds
 		if (!ageSel.equals("All Ages")) {
 			dash = ageSel.indexOf("-");
 			lowerStr = ageSel.substring(0, dash);
@@ -151,12 +146,28 @@ if(session.getAttribute("name")!=null)
 			if(!upperStr.equals("")){
 				upperAge = Integer.parseInt(upperStr);
 				upperAgeFilter = "u.age < " + upperAge;
-				session.setAttribute("upperAgeFilter", upperAgeFilter);
 			}
 			lowerAgeFilter = "u.age >= " + lowerAge;	
-			session.setAttribute("lowerAgeFilter", lowerAgeFilter);
 		}
 
+		// Update count for number of times next buttons have been clicked
+		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
+			nextProds++;
+			session.setAttribute("nextProds", nextProds);
+			session.setAttribute("nextRows", nextRows);
+			session.setAttribute("stateSel", stateSel);
+			session.setAttribute("stateFilter", stateFilter);
+			session.setAttribute("ageSel", ageSel);
+		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
+				|| nextRowsStr.equals("Next 20 States"))) {
+			nextRows++;
+			session.setAttribute("nextRows", nextRows);
+			session.setAttribute("nextProds", nextProds);
+			session.setAttribute("rowsTitle", rowsTitle);
+			session.setAttribute("stateSel", stateSel);
+			session.setAttribute("stateFilter", stateFilter);
+			session.setAttribute("ageSel", ageSel);
+		}
 
 	   String c_id_str=null,key=null;
 	   int c_id_int=-1;
@@ -234,11 +245,37 @@ if(session.getAttribute("name")!=null)
 		</SELECT>
 		Age:
 		<SELECT name="age">
-			<OPTION value="All Ages">All Ages</OPTION>
-			<OPTION value="12-18">12-18</OPTION>
-			<OPTION value="18-45">18-45</OPTION>
-			<OPTION value="45-65">45-65</OPTION>
-			<OPTION value="65-">65-</OPTION>
+			<% if(ageSel.equals("All Ages")){%>
+				<OPTION value="All Ages" selected>All Ages</OPTION>
+				<OPTION value="12-18">12-18</OPTION>
+				<OPTION value="18-45">18-45</OPTION>
+				<OPTION value="45-65">45-65</OPTION>
+				<OPTION value="65-">65-</OPTION>
+			<%} else if(ageSel.equals("12-18")){%>
+				<OPTION value="All Ages">All Ages</OPTION>
+				<OPTION value="12-18" selected>12-18</OPTION>
+				<OPTION value="18-45">18-45</OPTION>
+				<OPTION value="45-65">45-65</OPTION>
+				<OPTION value="65-">65-</OPTION>
+			<%} else if(ageSel.equals("18-45")){%>
+				<OPTION value="All Ages">All Ages</OPTION>
+				<OPTION value="12-18">12-18</OPTION>
+				<OPTION value="18-45" selected>18-45</OPTION>
+				<OPTION value="45-65">45-65</OPTION>
+				<OPTION value="65-">65-</OPTION>
+			<%} else if(ageSel.equals("45-65")){%>
+				<OPTION value="All Ages">All Ages</OPTION>
+				<OPTION value="12-18">12-18</OPTION>
+				<OPTION value="18-45">18-45</OPTION>
+				<OPTION value="45-65" selected>45-65</OPTION>
+				<OPTION value="65-">65-</OPTION>
+			<%} else if(ageSel.equals("65-")){%>
+				<OPTION value="All Ages">All Ages</OPTION>
+				<OPTION value="12-18">12-18</OPTION>
+				<OPTION value="18-45">18-45</OPTION>
+				<OPTION value="45-65">45-65</OPTION>
+				<OPTION value="65-" selected>65-</OPTION>
+				<%}%>
 		</SELECT>
 		<input type="submit" name="runQuery" value="Run Query"/>
 	</form>
