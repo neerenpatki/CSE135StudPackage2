@@ -9,6 +9,7 @@
 <%@include file="welcome.jsp" %>
 <div align="center"> <h2>Sales Analytics</h2></div>
 <%
+long startTime = System.nanoTime();
 if(session.getAttribute("name")!=null)
 {
 	int userID  = (Integer)session.getAttribute("userID");
@@ -267,7 +268,7 @@ if(session.getAttribute("name")!=null)
 		out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
 		out.println("<tr align=\"center\"><td width=\"20%\"><B>"+rowsTitle+"</B></td>");
 		String prodName=""; // Store the product name
-		int[] prodID = new int[10]; // Store the first 10 id's of the products
+		//int[] prodID = new int[10]; // Store the first 10 id's of the products
 		int prodIndex = 0;
 		// Go through the first 10 products and get id and name
 		while (prodRS.next()) {
@@ -311,28 +312,67 @@ if(session.getAttribute("name")!=null)
 			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
 			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.state "
 			+ "ORDER BY u.state";
+			long start = System.nanoTime();
 			stateSpentRS = stmt4.executeQuery(stateSpentSQL);
-
+			long end = System.nanoTime();
+			out.println("State Spent: " + (end - start));
+			String startState = "";
+			String endState = "";
+			if (nextRows >= 2) {
+				startState = states[40];
+				endState = states[49];
+			} else if (nextRows == 1) {
+				startState = states[20];
+				endState = states[39];
+			} else {
+				startState = states[0];
+				endState = states[19];
+			}
 			spentSQL = "SELECT p.id, p.name, u.state, SUM(s.quantity*s.price) FROM "
 			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
 			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND "+lowerAgeFilter+
-			" AND "+upperAgeFilter+" GROUP BY u.state, p.id ORDER BY u.state";
+			" AND "+upperAgeFilter+" WHERE p.name >= '"+
+			prodNames.get(0)+"' AND p.name <= '"+prodNames.get(prodNames.size()-1)+"' AND u.state >= '"
+			+startState+"' AND u.state <= '"+endState+"' "+
+			"GROUP BY u.state, p.id ORDER BY u.state";
+
+			start = System.nanoTime();
 			spentRS = stmt3.executeQuery(spentSQL);
+			end = System.nanoTime();
+			out.println("Spent: " + (end - start));
 		} else { // Dealing with customers
 			customerSpentSQL = "SELECT u.id, u.name, COALESCE(SUM(s.quantity*s.price),0) FROM "
 			+ "users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON "
 			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
 			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.id "
 			+ "ORDER BY u.name LIMIT 20 OFFSET " +(nextRows*20);
+			long start = System.nanoTime();
 			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
+			long end = System.nanoTime();
+			out.println("Customer Spent: " + (end - start));
+			ArrayList<String> customerNames = new ArrayList<String>();
+			if (customerSpentRS.next()) {
+				customerSpentRS.first();
+				customerNames.add(customerSpentRS.getString(2));
+				customerSpentRS.last();
+				customerNames.add(customerSpentRS.getString(2));
+			}
+			customerSpentRS.beforeFirst();
+			// Add condition for if no customers to show
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
 
 			spentSQL = "SELECT p.id, p.name, u.name, SUM(s.quantity*s.price) FROM "
 			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
-			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id"+
+			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id WHERE p.name >= '"+
+			prodNames.get(0)+"' AND p.name <= '"+prodNames.get(prodNames.size()-1)+"' AND u.name >= '"+
+			customerNames.get(0)+"' AND u.name <= '"+customerNames.get(customerNames.size()-1)+"'"+
 			" GROUP BY u.name, p.id ORDER BY u.name";
+			start = System.nanoTime();
 			spentRS = stmt3.executeQuery(spentSQL);
+
+			end = System.nanoTime();
+			out.println("Spent: " + (end - start));
 		}
 
 		// If the rows selected is states, then show the first 20 states
@@ -384,6 +424,7 @@ if(session.getAttribute("name")!=null)
 
 		 	ArrayList<String> prodsBought = new ArrayList<String>();
 		 	ArrayList<Float> prodsPrice = new ArrayList<Float>();
+		 	int count = 0;
 		 	while (spentRS.next()) {
 		 		if (rowsTitle.equals("States")) {
 		 			//out.println(name);
@@ -393,8 +434,12 @@ if(session.getAttribute("name")!=null)
 		 			}
 		 		} else {
 			 		if (customersRS.getString(2).equals(spentRS.getString(3))) {
+			 			//count++;
 			 			prodsBought.add(spentRS.getString(2));
 			 			prodsPrice.add(spentRS.getFloat(4));
+			 		} else {
+			 			//if (count > 0) break;
+			 			count = 0;
 			 		}
 		 		}
 		 	}
@@ -424,6 +469,11 @@ if(session.getAttribute("name")!=null)
 		} else {
 			nextVal = "Next 20 Customers";
 		}
+		
+		long endTime = System.nanoTime();
+		long totalTime = endTime - startTime;
+		double seconds = (double)totalTime / 1000000000.0;
+		out.println("Total time: " + (seconds));
 		%>
 		<div align="right"><form action="sales_analytics.jsp">
 			<input type="submit" name="Next 20 Rows" value="<%=nextVal%>"/>
