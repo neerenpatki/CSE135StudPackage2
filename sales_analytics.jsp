@@ -359,6 +359,9 @@ if(session.getAttribute("name")!=null)
 			}
 			customerSpentRS.beforeFirst();
 			// Add condition for if no customers to show
+			if (customerNames.size() == 0) {
+				customerNames.add("u.name");
+			}
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
 

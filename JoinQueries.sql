@@ -13,7 +13,7 @@ GROUP BY u.name, p.id ORDER BY u.name
 
 SELECT p.id, p.name, u.state as user, SUM(s.quantity*s.price) FROM products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN 
 sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND TRUE AND TRUE WHERE p.name >= 'A_P5739' AND p.name <= 'Y_P3797'
-AND u.state >= 'Alabama' AND u.state <= 'Maryland'
+AND u.state = 'Alabama'
 GROUP BY u.state, p.id ORDER BY u.state
 
 SELECT * FROM tempTable LIMIT 20
@@ -34,10 +34,11 @@ EXPLAIN ANALYZE VERBOSE
 SELECT p.name, SUM(s.quantity*s.price) FROM products p, sales s, users u, categories c WHERE p.id = s.pid AND u.state = 'Alabama'
  AND u.id = s.uid AND p.cid = c.id AND c.name = c.name GROUP BY p.id ORDER BY p.name
 
+EXPLAIN ANALYZE VERBOSE
 SELECT u.id, u.name, SUM(s.quantity*s.price) FROM users u LEFT OUTER JOIN 
 sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON (p.id = s.pid) LEFT OUTER JOIN
 categories c ON (p.cid = c.id) WHERE TRUE AND TRUE AND 
-TRUE AND TRUE GROUP BY u.id ORDER BY u.name LIMIT 20
+TRUE AND TRUE GROUP BY u.id ORDER BY u.name
 
 SELECT u.state, COALESCE(SUM(s.quantity*s.price),0) FROM 
 			users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON 
