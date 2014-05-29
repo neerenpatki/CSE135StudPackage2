@@ -99,6 +99,8 @@ if(session.getAttribute("name")!=null)
 			session.setAttribute("rowsTitle", rowsTitle);
 			//session.setAttribute("stateFilter", stateFilter);
 			session.setAttribute("ageSel", request.getParameter("age"));
+			session.setAttribute("stateSel", stateSel);
+			session.setAttribute("category", category);
 			
 		} else if(session.getAttribute("rowsTitle") != null && session.getAttribute("rowsTitle").equals("States")){
 			rowsTitle = "States";
@@ -438,6 +440,7 @@ if(session.getAttribute("name")!=null)
 			out.println("Spent: " + (end - start));
 		}
 
+		int rowCnt = 0;
 		// If the rows selected is states, then show the first 20 states
 		// otherwise traverse through the products
 		while((rowsTitle.equals("States") ? (i < (Math.min(20+(nextRows*20), states.length))) : (customersRS.next()))) {
@@ -466,6 +469,7 @@ if(session.getAttribute("name")!=null)
 				}
 				stateSpentRS.beforeFirst();
 				out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+stateSpentTot+")</td>");
+				rowCnt++;
 			 }
 			 else { // If the rows selection was Customers
 			 	uID = customersRS.getInt(1);
@@ -474,11 +478,13 @@ if(session.getAttribute("name")!=null)
 			 		name = customerSpentRS.getString(2); // Get the user name
 			 		customerSpentTot = customerSpentRS.getFloat(3);
 			 		out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
+			 		rowCnt++;
 			 	} else {
 			 		customerSpentRS.previous();
 			 		customerSpentTot = 0;
 			 		name = customersRS.getString(2); // Get the user name
 			 		out.println("<tr align=\"center\"><td width=\"20%\">"+name+" ($"+customerSpentTot+")</td>");
+			 		rowCnt++;
 			 	}
 			 	//name = customerSpentRS.getString(2); // Get the user name
 			}
@@ -540,7 +546,7 @@ if(session.getAttribute("name")!=null)
 		out.println("Total time: " + (seconds));
 		%>
 		<div align="right"><form action="sales_analytics.jsp">
-			<%if(stateSel.equals("All States") || stateSel == null){%>
+			<%if((stateSel.equals("All States") && rowCnt == 20) || stateSel == null){%>
 				<input type="submit" name="Next 20 Rows" value="<%=nextVal%>"/>
 			<%}%>	
 		</form></div>
