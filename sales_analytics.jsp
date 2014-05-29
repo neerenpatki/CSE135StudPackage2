@@ -311,7 +311,7 @@ if(session.getAttribute("name")!=null)
 		while (prodRS.next()) {
 		    int id = prodRS.getInt(1);
 		    prodName = prodRS.getString(2);
-		    prodNames.add(prodName);
+		    prodNames.add("'"+prodName+"'");
 		    String stateTemp = stateSel;
 		    // If state is not specified
 		    if (stateTemp.equals("All States")) {
@@ -390,23 +390,26 @@ if(session.getAttribute("name")!=null)
 			ArrayList<String> customerNames = new ArrayList<String>();
 			if (customerSpentRS.next()) {
 				customerSpentRS.first();
-				customerNames.add(customerSpentRS.getString(2));
+				customerNames.add("'"+customerSpentRS.getString(2)+"'");
 				customerSpentRS.last();
-				customerNames.add(customerSpentRS.getString(2));
+				customerNames.add("'"+customerSpentRS.getString(2)+"'");
 			}
 			customerSpentRS.beforeFirst();
 			// Add condition for if no customers to show
 			if (customerNames.size() == 0) {
 				customerNames.add("u.name");
 			}
+			if (prodNames.size() == 0) {
+				prodNames.add("p.name");
+			}
 			customersRS = stmt7.executeQuery("SELECT id, name FROM users u WHERE "+stateFilter+" AND "
 			+lowerAgeFilter+" AND "+upperAgeFilter+ " ORDER BY u.name LIMIT 20 OFFSET "+(nextRows*20));
 
 			spentSQL = "SELECT p.id, p.name, u.name, SUM(s.quantity*s.price) FROM "
 			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
-			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id WHERE p.name >= '"+
-			prodNames.get(0)+"' AND p.name <= '"+prodNames.get(prodNames.size()-1)+"' AND u.name >= '"+
-			customerNames.get(0)+"' AND u.name <= '"+customerNames.get(customerNames.size()-1)+"'"+
+			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id WHERE p.name >= "+
+			prodNames.get(0)+" AND p.name <= "+prodNames.get(prodNames.size()-1)+" AND u.name >= "+
+			customerNames.get(0)+" AND u.name <= "+customerNames.get(customerNames.size()-1)+
 			" GROUP BY u.name, p.id ORDER BY u.name";
 			start = System.nanoTime();
 			spentRS = stmt3.executeQuery(spentSQL);
