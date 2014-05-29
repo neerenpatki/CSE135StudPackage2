@@ -86,7 +86,13 @@ if(session.getAttribute("name")!=null)
 		session.setAttribute("nextRows", 0);
 		//session.setAttribute("stateSel", "All States");
 		//session.setAttribute("ageSel", "All Ages");
-		
+		//session.setAttribute("category", "All Categories");
+		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
+			nextProds++;
+		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
+				|| nextRowsStr.equals("Next 20 States"))) {
+			nextRows++;
+		}
 		// If the user clicked run query
 		if (action != null && action.equals("Run Query")) {
 			rowsTitle = request.getParameter("rowTitle");
@@ -103,20 +109,30 @@ if(session.getAttribute("name")!=null)
 		}
 		
 		stateSel = request.getParameter("state");
-		if (stateSel == null) {
+		//session.setAttribute("stateSel". stateSel);
+		if (stateSel == null && nextRows == 0 && nextProds == 0) {
 			stateSel = "All States"; // Set default to be All States
-		} else {
+			session.setAttribute("stateSel",stateSel);
+		} else if(stateSel != null && nextRows == 0 && nextProds == 0){
+			session.setAttribute("stateSel", stateSel);
 			stateFilter = "u.state = '" + stateSel + "'";
 			//session.setAttribute("stateFilter", stateFilter);
+		} else{
+			stateSel = (String)session.getAttribute("stateSel");
+			stateFilter = "u.state = '" + stateSel + "'";
 		}
-		
 		if (stateSel.equals("All States")) stateFilter = "TRUE";
+
 		category = request.getParameter("category"); // Get the selected category
-		if (category == null) {
+		if (category == null && nextRows == 0 && nextProds == 0) {
 			category = "All Categories"; // Set the default to be All Categories
-		} else {
+			session.setAttribute("category",category);
+		} else if(category != null && nextRows == 0 && nextProds == 0){
+			session.setAttribute("category", category);
 			categoryFilter = "c.name = '" + category + "'";
-			session.setAttribute("categoryFilter", categoryFilter);
+		}else {
+			category = (String)session.getAttribute("category");
+			categoryFilter = "c.name = '" + category + "'";
 		}
 
 		if (category.equals("All Categories")) categoryFilter = "TRUE";
@@ -153,21 +169,22 @@ if(session.getAttribute("name")!=null)
 
 		// Update count for number of times next buttons have been clicked
 		if (nextProdsStr != null && nextProdsStr.equals("Next 10 Products")) {
-			nextProds++;
+			
 			session.setAttribute("nextProds", nextProds);
 			session.setAttribute("nextRows", nextRows);
 			session.setAttribute("stateSel", stateSel);
 			session.setAttribute("stateFilter", stateFilter);
 			session.setAttribute("ageSel", ageSel);
+			session.setAttribute("category", category);
 		} else if (nextRowsStr != null && (nextRowsStr.equals("Next 20 Customers") 
 				|| nextRowsStr.equals("Next 20 States"))) {
-			nextRows++;
 			session.setAttribute("nextRows", nextRows);
 			session.setAttribute("nextProds", nextProds);
 			session.setAttribute("rowsTitle", rowsTitle);
 			session.setAttribute("stateSel", stateSel);
 			session.setAttribute("stateFilter", stateFilter);
 			session.setAttribute("ageSel", ageSel);
+			session.setAttribute("category", category);
 		}
 
 	   String c_id_str=null,key=null;
@@ -282,7 +299,7 @@ if(session.getAttribute("name")!=null)
 	</form>
 
 	<br>
-<%}%>
+<%} out.println("Next rows: " + nextRows + " Next prods: " + nextProds);%>
 <%		
 		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
@@ -365,11 +382,14 @@ if(session.getAttribute("name")!=null)
 				startState = states[0];
 				endState = states[19];
 			}
+			if (prodNames.size() == 0) {
+				prodNames.add("p.name");
+			}
 			spentSQL = "SELECT p.id, p.name, u.state, SUM(s.quantity*s.price) FROM "
 			+"products p LEFT OUTER JOIN categories c ON (p.cid = c.id) LEFT OUTER JOIN "+
 			"sales s ON (p.id = s.pid) LEFT OUTER JOIN users u ON s.uid = u.id AND "+lowerAgeFilter+
-			" AND "+upperAgeFilter+" WHERE p.name >= '"+
-			prodNames.get(0)+"' AND p.name <= '"+prodNames.get(prodNames.size()-1)+"' AND u.state >= '"
+			" AND "+upperAgeFilter+" WHERE p.name >= "+
+			prodNames.get(0)+" AND p.name <= "+prodNames.get(prodNames.size()-1)+" AND u.state >= '"
 			+startState+"' AND u.state <= '"+endState+"' "+
 			"GROUP BY u.state, p.id ORDER BY u.state";
 
@@ -428,6 +448,7 @@ if(session.getAttribute("name")!=null)
 			}
 			// If the rows selection was States and a state was specified
 			else if(rowsTitle.equals("States") && !stateSel.equals("All States")){
+			out.println(stateSel);
 				name = stateSel;
 				tempState = name; // Store the state temporarily
 				//stateSel = "All States";
@@ -519,7 +540,9 @@ if(session.getAttribute("name")!=null)
 		out.println("Total time: " + (seconds));
 		%>
 		<div align="right"><form action="sales_analytics.jsp">
-			<input type="submit" name="Next 20 Rows" value="<%=nextVal%>"/>
+			<%if(stateSel.equals("All States") || stateSel == null){%>
+				<input type="submit" name="Next 20 Rows" value="<%=nextVal%>"/>
+			<%}%>	
 		</form></div>
 		
 		<div align="right"><form action="sales_analytics.jsp">
