@@ -301,7 +301,7 @@ if(session.getAttribute("name")!=null)
 	</form>
 
 	<br>
-<%} out.println("Next rows: " + nextRows + " Next prods: " + nextProds);%>
+<%}%>
 <%		
 		// If category is All Categories
 		if(category != null && category.equals("All Categories")){
@@ -368,10 +368,7 @@ if(session.getAttribute("name")!=null)
 			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
 			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.state "
 			+ "ORDER BY u.state";
-			long start = System.nanoTime();
 			stateSpentRS = stmt4.executeQuery(stateSpentSQL);
-			long end = System.nanoTime();
-			out.println("State Spent: " + (end - start));
 			String startState = "";
 			String endState = "";
 			if (nextRows >= 2) {
@@ -395,20 +392,15 @@ if(session.getAttribute("name")!=null)
 			+startState+"' AND u.state <= '"+endState+"' "+
 			"GROUP BY u.state, p.id ORDER BY u.state";
 
-			start = System.nanoTime();
 			spentRS = stmt3.executeQuery(spentSQL);
-			end = System.nanoTime();
-			out.println("Spent: " + (end - start));
 		} else { // Dealing with customers
 			customerSpentSQL = "SELECT u.id, u.name, COALESCE(SUM(s.quantity*s.price),0) FROM "
 			+ "users u LEFT OUTER JOIN sales s ON (s.uid = u.id) LEFT OUTER JOIN products p ON "
 			+ "(p.id = s.pid) LEFT OUTER JOIN categories c ON (p.cid = c.id) WHERE "+stateFilter+
 			" AND "+categoryFilter+ " AND "+lowerAgeFilter+" AND "+upperAgeFilter+" GROUP BY u.id "
 			+ "ORDER BY u.name LIMIT 20 OFFSET " +(nextRows*20);
-			long start = System.nanoTime();
 			customerSpentRS = stmt5.executeQuery(customerSpentSQL);
 			long end = System.nanoTime();
-			out.println("Customer Spent: " + (end - start));
 			ArrayList<String> customerNames = new ArrayList<String>();
 			if (customerSpentRS.next()) {
 				customerSpentRS.first();
@@ -434,11 +426,7 @@ if(session.getAttribute("name")!=null)
 			prodNames.get(0)+" AND p.name <= "+prodNames.get(prodNames.size()-1)+" AND u.name >= "+
 			customerNames.get(0)+" AND u.name <= "+customerNames.get(customerNames.size()-1)+
 			" GROUP BY u.name, p.id ORDER BY u.name";
-			start = System.nanoTime();
 			spentRS = stmt3.executeQuery(spentSQL);
-
-			end = System.nanoTime();
-			out.println("Spent: " + (end - start));
 		}
 
 		int rowCnt = 0;

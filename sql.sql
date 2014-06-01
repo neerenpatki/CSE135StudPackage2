@@ -70,21 +70,12 @@ CREATE TABLE sales (
 SELECT * FROM sales order by id desc;
 
 
-
-CREATE TABLE carts (
-    id          SERIAL PRIMARY KEY,
-    uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
-    pid         INTEGER REFERENCES products (id) ON DELETE CASCADE,
-    quantity    INTEGER NOT NULL,
-    price	INTEGER NOT NULL
-);
-
-INSERT INTO carts (uid, pid, quantity, price) VALUES(3, 1 , 2, 1200);
-INSERT INTO carts (uid, pid, quantity, price) VALUES(3, 2 , 1, 480);
-INSERT INTO carts (uid, pid, quantity, price) VALUES(4, 10, 4, 249);
-INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 12, 2, 232);
-INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 9 , 5, 520);
-INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 5 , 3, 488);
-INSERT INTO carts (uid, pid, quantity, price) VALUES(5, 1, 1, 1200);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(3, 1 , 2, 1200);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(3, 2 , 1, 480);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(4, 10, 4, 249);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(5, 12, 2, 232);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(5, 9 , 5, 520);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(5, 5 , 3, 488);
+INSERT INTO sales (uid, pid, quantity, price) VALUES(5, 1, 1, 1200);
 
 SELECT * FROM carts order by id desc;
